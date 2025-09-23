@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список услуг - Анализ композиционного центра</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+
+<header class="header">
+    <div class="header__title">Анализ композиционного центра</div>
+    <a href="/" class="header__home-button">Домой</a>
+</header>
+
+<form class="search-form" method="GET" action="/services">
+    <input type="text" name="q" placeholder="Поиск услуг..." class="search-form__input">
+    <button type="submit" class="search-form__button">Найти</button>
+</form>
+
+<section class="service-grid">
+    {{range .Services}}
+    <div class="card service-card">
+        <div class="card-image">
+            <img src="{{.ImageURL}}" alt="{{.Name}}">
+        </div>
+        <div class="card-content">
+            <h3>{{.Name}}</h3>
+            <p><strong>Метод:</strong> {{.Method}}</p>
+            <a href="/service/{{.ID}}" class="card-button">Подробнее</a>
+        </div>
+    </div>
+    {{end}}
+</section>
+
+<section class="application-wrapper">
+    <div class="card application-card">
+        <p><strong>Ваша заявка: </strong> #{{.OrderID}}</p>
+        <p><strong>Количество услуг в заявке:</strong> {{.OrderCount}}</p>
+        <a href="/order/{{.OrderID}}" class="card-button">Перейти к заявке</a>
+    </div>
+</section>
+
+</body>
+</html>

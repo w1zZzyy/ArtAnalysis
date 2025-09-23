@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заявка #{{.Order.ID}} - Анализ композиционного центра</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+
+<header class="header">
+    <div class="header__title">Анализ композиционного центра</div>
+    <a href="/services" class="header__home-button">Домой</a>
+</header>
+
+<main class="order-page">
+    <div class="order-container">
+
+        <!-- Глобальный результат -->
+        <div class="global-result-card">
+            <h2>Общий результат</h2>
+            <p>{{.GlobalResult}}</p>
+        </div>
+
+        <!-- Сетка карточек услуг -->
+        <section class="service-grid">
+            {{- if .Items }}
+                {{- range .Items }}
+                <div class="card">
+                    <img src="{{.ImageURL}}" alt="{{.Service.Name}}">
+                    <h3>{{.Service.Name}}</h3>
+                    <p><strong>Метод:</strong> {{.Service.Method}}</p>
+                    <div class="card-meta">
+                        <p><strong>Результат:</strong> {{.Result}}</p>
+                    </div>
+                </div>
+                {{- end }}
+            {{- else }}
+                <p>Услуги в этой заявке отсутствуют.</p>
+            {{- end }}
+        </section>
+
+    </div>
+</main>
+
+</body>
+</html>

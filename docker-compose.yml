@@ -1,0 +1,59 @@
+services:
+  app:
+    image: golang:1.25.1
+    container_name: art-analysis-app
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: go run ./cmd/server/main.go
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - minio
+    networks:
+      - art-network
+    restart: always
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"   # MinIO API
+      - "9001:9001"   # Web Console
+    env_file:
+      - .env
+    volumes:
+      - ./minio/data:/data
+    networks:
+      - art-network
+
+  mc:
+    image: minio/mc:latest
+    container_name: mc
+    depends_on:
+      - minio
+    entrypoint: /bin/sh
+    command: >
+      -c "
+      until mc alias set local http://minio:9000 \$${MINIO_ROOT_USER} \$${MINIO_ROOT_PASSWORD}; do
+        echo 'Waiting for MinIO...'; sleep 2;
+      done &&
+      mc mb --ignore-existing local/\$${MINIO_BUCKET} &&
+      mc anonymous set download local/\$${MINIO_BUCKET} &&
+      mc cp --recursive /resources/images/* local/\$${MINIO_BUCKET} &&
+      echo 'MinIO bucket \$${MINIO_BUCKET} готов, изображения загружены';
+      tail -f /dev/null
+      "
+    volumes:
+      - ./resources/images:/resources/images
+    env_file:
+      - .env
+    networks:
+      - art-network
+
+networks:
+  art-network:
+    driver: bridge

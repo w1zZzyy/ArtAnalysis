@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Service.Name}} - Анализ композиционного центра</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+
+<header class="header">
+    <div class="header__title">Анализ композиционного центра</div>
+    <a href="/services" class="header__home-button">Вернуться к услугам</a>
+</header>
+
+<main class="service-detail-wrapper">
+    <div class="card service-detail-card">
+        <div class="card-image">
+            <img src="{{.ImageURL}}" alt="{{.Service.Name}}">
+        </div>
+        <div class="card-content">
+            <h2>{{.Service.Name}}</h2>
+            <p><strong>Метод:</strong> {{.Service.Method}}</p>
+            {{if .Service.Description}}
+            <p>{{.Service.Description}}</p>
+            {{end}}
+        </div>
+    </div>
+</main>
+
+</body>
+</html>
