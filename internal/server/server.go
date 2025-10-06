@@ -21,25 +21,25 @@ func NewServer() *Server {
 		mux:  http.NewServeMux(),
 	}
 
-	s.mux.HandleFunc("/services", handler.ServicesHandler)
-	s.mux.HandleFunc("/service/", func(w http.ResponseWriter, r *http.Request) {
-		id := strings.TrimPrefix(r.URL.Path, "/service/")
+	s.mux.HandleFunc("/artcenters", handler.ArtCentersHandler)
+	s.mux.HandleFunc("/artcenter/", func(w http.ResponseWriter, r *http.Request) {
+		id := strings.TrimPrefix(r.URL.Path, "/artcenter/")
 		if id == "" {
-			http.Error(w, "ID услуги не указан", http.StatusBadRequest)
+			http.Error(w, "ID произведения не указан", http.StatusBadRequest)
 			return
 		}
 		r = r.WithContext(r.Context())
-		handler.ServiceDetailHandler(w, r.WithContext(r.Context()))
+		handler.ArtCenterDetailHandler(w, r.WithContext(r.Context()))
 	})
 
-	s.mux.HandleFunc("/order/", func(w http.ResponseWriter, r *http.Request) {
-		id := strings.TrimPrefix(r.URL.Path, "/order/")
+	s.mux.HandleFunc("/basket/", func(w http.ResponseWriter, r *http.Request) {
+		id := strings.TrimPrefix(r.URL.Path, "/basket/")
 		if id == "" {
-			http.Error(w, "ID заявки не указан", http.StatusBadRequest)
+			http.Error(w, "ID корзины не указан", http.StatusBadRequest)
 			return
 		}
 		r = r.WithContext(r.Context())
-		handler.OrderDetailHandler(w, r.WithContext(r.Context()))
+		handler.BasketDetailHandler(w, r.WithContext(r.Context()))
 	})
 
 	fs := http.FileServer(http.Dir("./static"))

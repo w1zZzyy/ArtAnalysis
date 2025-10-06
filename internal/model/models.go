@@ -1,16 +1,20 @@
 package model
 
-type Service struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Method      string `json:"method"`
-	Description string `json:"description"`
-	ImageKey    string `json:"imageKey"`
+type ArtCenter struct {
+	ArtID          string `json:"artId"`
+	Title          string `json:"title"`
+	Algorithm      string `json:"algorithm"`
+	ArtDescription string `json:"artDescription"`
+	ArtImageKey    string `json:"artImageKey"`
 }
 
-type Order struct {
-	ID      string   `json:"id"`
-	ItemIDs string   `json:"itemIds"`
-	Counts  string   `json:"counts"`
-	Results []string `json:"results"`
+type Basket struct {
+	BasketID string `json:"basketId"`
+	ArtIDs   string `json:"artIds"`
+	Counts   string `json:"counts"`
+}
+
+type AnalysisResult struct {
+	BasketID string
+	Results  map[string]string // map[ArtID]Coordinates
 }

@@ -13,53 +13,57 @@ import (
 )
 
 // ===============================
-// /services — список услуг
+// /artcenters — список произведений
 // ===============================
-func ServicesHandler(w http.ResponseWriter, r *http.Request) {
+func ArtCentersHandler(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 
-	services := repository.GetAllServices()
-	filtered := []model.Service{}
-	for _, s := range services {
-		if q == "" || strings.Contains(strings.ToLower(s.Name), strings.ToLower(q)) {
+	fmt.Println(q)
+
+	artCenters := repository.GetAllArtCenters()
+	filtered := []model.ArtCenter{}
+	for _, s := range artCenters {
+		if q == "" || strings.Contains(strings.ToLower(s.Title), strings.ToLower(q)) {
 			filtered = append(filtered, s)
 		}
 	}
 
-	orderID := "1"
-	orderCount := 0
-	order, ok := repository.GetOrderByID(orderID)
+	basketID := "1"
+	basketCount := 0
+	basket, ok := repository.GetBasketByID(basketID)
 	if ok {
-		orderCount = len(strings.Split(order.ItemIDs, ","))
+		basketCount = len(strings.Split(basket.ArtIDs, ","))
 	}
 
-	type ServiceItem struct {
-		ID       string
-		Name     string
-		Method   string
-		ImageURL string
+	type ArtCenterItem struct {
+		ArtID          string
+		Title          string
+		Algorithm      string
+		ArtDescription string
+		ArtImageURL    string
 	}
 
-	var serviceItems []ServiceItem
+	var artCenterItems []ArtCenterItem
 	for _, s := range filtered {
-		serviceItems = append(serviceItems, ServiceItem{
-			ID:       s.ID,
-			Name:     s.Name,
-			Method:   s.Method,
-			ImageURL: storage.BuildImageURL(s.ImageKey),
+		artCenterItems = append(artCenterItems, ArtCenterItem{
+			ArtID:          s.ArtID,
+			Title:          s.Title,
+			Algorithm:      s.Algorithm,
+			ArtDescription: s.ArtDescription,
+			ArtImageURL:    storage.BuildImageURL(s.ArtImageKey),
 		})
 	}
 
 	tmplData := struct {
-		Services   []ServiceItem
-		Query      string
-		OrderID    string
-		OrderCount int
+		ArtCenters  []ArtCenterItem
+		Query       string
+		BasketID    string
+		BasketCount int
 	}{
-		Services:   serviceItems,
-		Query:      q,
-		OrderID:    orderID,
-		OrderCount: orderCount,
+		ArtCenters:  artCenterItems,
+		Query:       q,
+		BasketID:    basketID,
+		BasketCount: basketCount,
 	}
 
 	tmpl, err := template.ParseFiles("templates/services.html")
@@ -77,7 +81,7 @@ func ServicesHandler(w http.ResponseWriter, r *http.Request) {
 // ===============================
 // /service/{id} — детальная страница услуги
 // ===============================
-func ServiceDetailHandler(w http.ResponseWriter, r *http.Request) {
+func ArtCenterDetailHandler(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(r.URL.Path, "/")
 	if len(parts) < 3 || parts[2] == "" {
 		http.Error(w, "Не указан ID услуги", http.StatusBadRequest)
@@ -85,18 +89,18 @@ func ServiceDetailHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	id := parts[2]
 
-	service, ok := repository.GetServiceByID(id)
+	artCenter, ok := repository.GetArtCenterByID(id)
 	if !ok {
-		http.Error(w, "Услуга не найдена", http.StatusNotFound)
+		http.Error(w, "Произведение не найдено", http.StatusNotFound)
 		return
 	}
 
 	data := struct {
-		Service  model.Service
-		ImageURL string
+		ArtCenter   model.ArtCenter
+		ArtImageURL string
 	}{
-		Service:  *service,
-		ImageURL: storage.BuildImageURL(service.ImageKey),
+		ArtCenter:   *artCenter,
+		ArtImageURL: storage.BuildImageURL(artCenter.ArtImageKey),
 	}
 
 	tmpl, err := template.ParseFiles("templates/service.html")
@@ -114,7 +118,7 @@ func ServiceDetailHandler(w http.ResponseWriter, r *http.Request) {
 // ===============================
 // /order/{id} — страница заявки
 // ===============================
-func OrderDetailHandler(w http.ResponseWriter, r *http.Request) {
+func BasketDetailHandler(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(r.URL.Path, "/")
 	if len(parts) < 3 || parts[2] == "" {
 		http.Error(w, "Не указан ID заявки", http.StatusBadRequest)
@@ -122,73 +126,69 @@ func OrderDetailHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	id := parts[2]
 
-	order, ok := repository.GetOrderByID(id)
+	basket, ok := repository.GetBasketByID(id)
 	if !ok {
-		http.Error(w, "Заявка не найдена", http.StatusNotFound)
+		http.Error(w, "Корзина не найдена", http.StatusNotFound)
 		return
 	}
 
-	itemIDs := strings.Split(order.ItemIDs, ",")
-	counts := strings.Split(order.Counts, ",")
-
-	type OrderItem struct {
-		Service  model.Service
-		Quantity int
-		ImageURL string
-		Result   string
+	type BasketItem struct {
+		ArtCenter   model.ArtCenter
+		ArtImageURL string
+		CenterX     int
+		CenterY     int
 	}
 
-	var items []OrderItem
+	var items []BasketItem
 	var sumX, sumY float64
-	var count float64
+	artIDs := strings.Split(basket.ArtIDs, ",")
 
-	for i, sid := range itemIDs {
-		service, ok := repository.GetServiceByID(sid)
+	for _, aid := range artIDs {
+		artCenter, ok := repository.GetArtCenterByID(aid)
 		if !ok {
 			continue
 		}
 
-		qty := 1
-		if i < len(counts) {
-			if n, err := strconv.Atoi(counts[i]); err == nil {
-				qty = n
-			}
+		result, ok := repository.GetAnalysisResultByBasketID(&basket.BasketID, &aid)
+		if !ok {
+			continue
+		}
+		coords := strings.Split(*result, ",")
+		if len(coords) != 2 {
+			continue
 		}
 
-		result := ""
-		if i < len(order.Results) {
-			result = order.Results[i]
-			coords := strings.Split(result, ",")
-			if len(coords) == 2 {
-				if x, err1 := strconv.ParseFloat(coords[0], 64); err1 == nil {
-					if y, err2 := strconv.ParseFloat(coords[1], 64); err2 == nil {
-						sumX += x
-						sumY += y
-						count++
-					}
-				}
-			}
+		x, err1 := strconv.Atoi(coords[0])
+		y, err2 := strconv.Atoi(coords[1])
+
+		if err1 != nil || err2 != nil {
+			continue
 		}
 
-		items = append(items, OrderItem{
-			Service:  *service,
-			Quantity: qty,
-			ImageURL: storage.BuildImageURL(service.ImageKey),
-			Result:   result,
+		sumX += float64(x)
+		sumY += float64(y)
+
+		items = append(items, BasketItem{
+			ArtCenter:   *artCenter,
+			ArtImageURL: storage.BuildImageURL(artCenter.ArtImageKey),
+			CenterX:     x,
+			CenterY:     y,
 		})
 	}
 
+	cnt := float64(len(items))
 	globalResult := ""
-	if count > 0 {
-		globalResult = fmt.Sprintf("x: %.2f, y: %.2f", sumX/count, sumY/count)
+
+	if cnt > 0 {
+		globalResult = fmt.Sprintf("X: %.2f\t Y: %.2f", sumX/cnt, sumY/cnt)
 	}
 
 	data := struct {
-		Order        model.Order
-		Items        []OrderItem
+		Basket       model.Basket
+		Items        []BasketItem
 		GlobalResult string
 	}{
-		Order:        *order,
+		Basket:       *basket,
 		Items:        items,
 		GlobalResult: globalResult,
 	}

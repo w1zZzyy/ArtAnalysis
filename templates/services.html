@@ -3,42 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Список услуг - Анализ композиционного центра</title>
+    <title>Список произведений - Анализ композиционного центра</title>
     <link rel="stylesheet" href="../static/style.css">
+    <style>
+        /* Стили для корзины */
+        .basket-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+
+        .basket-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .basket-icon {
+            width: 40px;
+            height: 40px;
+            fill: #3498db; /* синий цвет корзины */
+        }
+
+        .basket-count {
+            position: absolute;
+            top: -4px;      /* чуть выше иконки */
+            right: 2px;     /* чуть правее */
+            color: #1f3b73; /* глубокий тёмно-синий, хорошо виден на фоне */
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-shadow: 0 0 2px rgba(255,255,255,0.4); /* делает цифру чётче */
+        }
+    </style>
 </head>
 <body>
 
 <header class="header">
     <div class="header__title">Анализ композиционного центра</div>
-    <a href="/" class="header__home-button">Домой</a>
+    <a href="/artcenters" class="header__home-button">Домой</a>
 </header>
 
-<form class="search-form" method="GET" action="/services">
+<div class="basket-bar">
+    <a href="/basket/{{.BasketID}}" class="basket-link">
+        <svg class="basket-icon" viewBox="0 0 24 24">
+            <path d="M7 18c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2zm10 0c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2zm1.104-2.447l1.447-8.553h-16l1.447 8.553c.104.617.641 1.447 1.449 1.447h10.208c.808 0 1.345-.83 1.449-1.447zm-13.104-10.553v-2h2v2h8v-2h2v2h2v2h-16v-2h2z"/>
+        </svg>
+        <span class="basket-count">{{.BasketCount}}</span>
+    </a>
+</div>
+
+<form class="search-form" method="GET" action="/artcenters">
     <input type="text" name="q" placeholder="Поиск услуг..." class="search-form__input">
     <button type="submit" class="search-form__button">Найти</button>
 </form>
 
-<section class="service-grid">
-    {{range .Services}}
-    <div class="card service-card">
+<section class="artcenters-grid">
+    {{range .ArtCenters}}
+    <div class="card artcenter-card">
         <div class="card-image">
-            <img src="{{.ImageURL}}" alt="{{.Name}}">
+            <img src="{{.ArtImageURL}}" alt="{{.Title}}">
         </div>
         <div class="card-content">
-            <h3>{{.Name}}</h3>
-            <p><strong>Метод:</strong> {{.Method}}</p>
-            <a href="/service/{{.ID}}" class="card-button">Подробнее</a>
+            <h3>{{.Title}}</h3>
+            <p><strong>Алгоритм:</strong> {{.Algorithm}}</p>
+            <a href="/artcenter/{{.ArtID}}" class="card-button">Подробнее</a>
         </div>
     </div>
     {{end}}
-</section>
-
-<section class="application-wrapper">
-    <div class="card application-card">
-        <p><strong>Ваша заявка: </strong> #{{.OrderID}}</p>
-        <p><strong>Количество услуг в заявке:</strong> {{.OrderCount}}</p>
-        <a href="/order/{{.OrderID}}" class="card-button">Перейти к заявке</a>
-    </div>
 </section>
 
 </body>

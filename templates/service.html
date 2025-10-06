@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Service.Name}} - Анализ композиционного центра</title>
+    <title>{{.ArtCenter.Title}} - Анализ композиционного центра</title>
     <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
 
 <header class="header">
     <div class="header__title">Анализ композиционного центра</div>
-    <a href="/services" class="header__home-button">Вернуться к услугам</a>
+    <a href="/artcenters" class="header__home-button">Домой</a>
 </header>
 
-<main class="service-detail-wrapper">
-    <div class="card service-detail-card">
+<main class="artcenter-detail-wrapper">
+    <div class="card artcenter-detail-card">
         <div class="card-image">
-            <img src="{{.ImageURL}}" alt="{{.Service.Name}}">
+                <img src="{{.ArtImageURL}}" alt="{{.ArtCenter.Title}}">
         </div>
         <div class="card-content">
-            <h2>{{.Service.Name}}</h2>
-            <p><strong>Метод:</strong> {{.Service.Method}}</p>
-            {{if .Service.Description}}
-            <p>{{.Service.Description}}</p>
-            {{end}}
+                <h2>{{.ArtCenter.Title}}</h2>
+                <p><strong>Алгоритм:</strong> {{.ArtCenter.Algorithm}}</p>
+                {{if .ArtCenter.ArtDescription}}
+                <p>{{.ArtCenter.ArtDescription}}</p>
+                {{end}}
         </div>
     </div>
 </main>

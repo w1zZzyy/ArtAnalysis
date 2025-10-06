@@ -11,59 +11,57 @@ import (
 // Коллекции в памяти
 // ===============================
 
-// Services — список услуг по анализу композиционного центра
-var Services = []model.Service{
+// ArtCenters — список произведений по анализу композиционного центра
+var ArtCenters = []model.ArtCenter{
 	{
-		ID:          "1",
-		Name:        "Анализ композиционного центра картины",
-		Method:      "Визуальный анализ изображения",
-		Description: "Определение ключевой точки композиции, выявление фокуса и направления взгляда.",
-		ImageKey:    "abstract_1.jpg",
+		ArtID:          "1",
+		Title:          "Анализ композиционного центра картины",
+		Algorithm:      "Визуальный анализ изображения",
+		ArtDescription: "Определение ключевой точки композиции, выявление фокуса и направления взгляда.",
+		ArtImageKey:    "abstract_1.jpg",
 	},
 	{
-		ID:          "2",
-		Name:        "Цветовой анализ произведений",
-		Method:      "Анализ цветовой гармонии изображения",
-		Description: "Определение доминирующих цветов, контрастов и гармонии в картине или фотографии.",
-		ImageKey:    "abstract_2.jpg",
+		ArtID:          "2",
+		Title:          "Цветовой анализ произведений",
+		Algorithm:      "Анализ цветовой гармонии изображения",
+		ArtDescription: "Определение доминирующих цветов, контрастов и гармонии в картине или фотографии.",
+		ArtImageKey:    "abstract_2.jpg",
 	},
 	{
-		ID:          "3",
-		Name:        "Оценка композиции фотографий",
-		Method:      "Цифровой анализ",
-		Description: "Выявление сильных и слабых сторон композиции фотографии, рекомендации по улучшению.",
-		ImageKey:    "abstract_3.jpg",
+		ArtID:          "3",
+		Title:          "Оценка композиции фотографий",
+		Algorithm:      "Цифровой анализ",
+		ArtDescription: "Выявление сильных и слабых сторон композиции фотографии, рекомендации по улучшению.",
+		ArtImageKey:    "abstract_3.jpg",
 	},
 	{
-		ID:          "4",
-		Name:        "Анализ скульптур и объектов",
-		Method:      "3D визуализация",
-		Description: "Определение композиционного центра и перспективного восприятия объема объекта.",
-		ImageKey:    "abstract_4.jpg",
+		ArtID:          "4",
+		Title:          "Анализ скульптур и объектов",
+		Algorithm:      "3D визуализация",
+		ArtDescription: "Определение композиционного центра и перспективного восприятия объема объекта.",
+		ArtImageKey:    "abstract_4.jpg",
 	},
 	{
-		ID:          "5",
-		Name:        "Композиционный анализ иллюстраций",
-		Method:      "Визуальный и цифровой анализ",
-		Description: "Определение ключевых элементов иллюстрации и построение визуального фокуса.",
-		ImageKey:    "abstract_5.jpg",
-	},
-	{
-		ID:          "6",
-		Name:        "Анализ перспективы в архитектуре",
-		Method:      "Цифровой и линейный анализ",
-		Description: "Определение центров перспективы и композиционного построения в архитектурных объектах.",
-		ImageKey:    "abstract_6.jpg",
+		ArtID:          "5",
+		Title:          "Композиционный анализ иллюстраций",
+		Algorithm:      "Визуальный и цифровой анализ",
+		ArtDescription: "Определение ключевых элементов иллюстрации и построение визуального фокуса.",
+		ArtImageKey:    "abstract_5.jpg",
 	},
 }
 
-// Orders — список заявок
-var Orders = []model.Order{
+// Baskets — список корзин
+var Baskets = []model.Basket{
 	{
-		ID:      "1",
-		ItemIDs: "1,3,5", // IDs услуг из Services через запятую
-		Counts:  "2,1,1", // количество каждой услуги через запятую
-		Results: []string{"10,20", "24,92", "88,11"},
+		BasketID: "1",
+		ArtIDs:   "1,3,5", // IDs произведений из ArtCenters через запятую
+	},
+}
+
+var Results = []model.AnalysisResult{
+	{
+		BasketID: "1",
+		Results:  map[string]string{"1": "10,20", "3": "24,92", "5": "88,11"},
 	},
 }
 
@@ -71,34 +69,46 @@ var Orders = []model.Order{
 // Функции доступа
 // ===============================
 
-// GetAllServices возвращает все услуги
-func GetAllServices() []model.Service {
-	return Services
+// GetAllArtCenters возвращает все произведения
+func GetAllArtCenters() []model.ArtCenter {
+	return ArtCenters
 }
 
-// GetServiceByID возвращает услугу по ID
-func GetServiceByID(id string) (*model.Service, bool) {
-	for _, s := range Services {
-		if s.ID == id {
+// GetArtCenterByID возвращает произведение по ID
+func GetArtCenterByID(id string) (*model.ArtCenter, bool) {
+	for _, s := range ArtCenters {
+		if s.ArtID == id {
 			return &s, true
 		}
 	}
 	return nil, false
 }
 
-// GetOrderByID возвращает заявку по ID
-func GetOrderByID(id string) (*model.Order, bool) {
-	for _, o := range Orders {
-		if o.ID == id {
+// GetBasketByID возвращает корзину по ID
+func GetBasketByID(id string) (*model.Basket, bool) {
+	for _, o := range Baskets {
+		if o.BasketID == id {
 			return &o, true
 		}
 	}
 	return nil, false
 }
 
-// CountItemsInOrder возвращает сумму всех количеств услуг в заявке
-func CountItemsInOrder(order *model.Order) int {
-	counts := strings.Split(order.Counts, ",")
+func GetAnalysisResultByBasketID(basketID *string, artId *string) (*string, bool) {
+	for _, r := range Results {
+		if r.BasketID == *basketID {
+			if coords, ok := r.Results[*artId]; ok {
+				return &coords, true
+			}
+			return nil, false
+		}
+	}
+	return nil, false
+}
+
+// CountItemsInBasket возвращает сумму всех количеств произведений в корзине
+func CountItemsInBasket(basket *model.Basket) int {
+	counts := strings.Split(basket.Counts, ",")
 	total := 0
 	for _, c := range counts {
 		n, err := strconv.Atoi(c)
