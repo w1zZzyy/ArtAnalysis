@@ -66,9 +66,9 @@ func ArtCentersHandler(w http.ResponseWriter, r *http.Request) {
 		BasketCount: basketCount,
 	}
 
-	tmpl, err := template.ParseFiles("templates/services.html")
+	tmpl, err := template.ParseFiles("templates/artcenters.html")
 	if err != nil {
-		http.Error(w, "Ошибка загрузки шаблона services.html: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Ошибка загрузки шаблона artcenters.html: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -79,7 +79,7 @@ func ArtCentersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // ===============================
-// /service/{id} — детальная страница услуги
+// /artcenter/{id} — детальная страница услуги
 // ===============================
 func ArtCenterDetailHandler(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(r.URL.Path, "/")
@@ -103,9 +103,9 @@ func ArtCenterDetailHandler(w http.ResponseWriter, r *http.Request) {
 		ArtImageURL: storage.BuildImageURL(artCenter.ArtImageKey),
 	}
 
-	tmpl, err := template.ParseFiles("templates/service.html")
+	tmpl, err := template.ParseFiles("templates/artcenter.html")
 	if err != nil {
-		http.Error(w, "Ошибка загрузки шаблона service.html: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Ошибка загрузки шаблона artcenter.html: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
