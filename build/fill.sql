@@ -47,7 +47,7 @@ INSERT INTO public.analysis_orders (
     92
 );
 
-INSERT INTO public.experts_to_orders (id_artcenter, id_order) VALUES
-(1, 1),
-(2, 1),
-(3, 1);
+INSERT INTO public.experts_to_orders (id_artcenter, id_order, center_x, center_y) VALUES
+(1, 1, 10, 22),
+(2, 1, 19, 72),
+(3, 1, 91, 14);

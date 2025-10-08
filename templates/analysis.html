@@ -34,8 +34,10 @@
                     </div>
                     <div class="basket-card__info">
                         <h3>{{.ArtExpert.Title}}</h3>
-                        {{if .ArtExpert.Description}}
-                        <p>{{.ArtExpert.Description}}</p>
+                        {{if .CenterX}}
+                            {{if .CenterY}}
+                                <p>X: {{.CenterX}}, Y: {{.CenterY}}</p>
+                            {{end}}
                         {{end}}
                     </div>
                 </div>
