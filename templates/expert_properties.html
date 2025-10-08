@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - Анализ композиционного центра</title>
+    <link rel="stylesheet" href="/static/styles/style.css">
+    <style>
+        .basket-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+        .basket-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+        }
+        .basket-icon {
+            width: 40px;
+            height: 40px;
+            fill: #3498db;
+        }
+        .basket-count {
+            position: absolute;
+            top: -4px;
+            right: 2px;
+            color: #1f3b73;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-shadow: 0 0 2px rgba(255,255,255,0.4);
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header__title">Анализ композиционного центра</div>
+    <a href="/experts" class="header__home-button">Домой</a>
+</header>
+
+<main class="artcenter-detail-wrapper-more">
+    <div class="card-more artcenter-detail-card-more">
+        <div class="card-image-more">
+            <img class="image-more" src="{{.ImgURL}}" alt="{{.Title}}">
+        </div>
+        <div class="card-content-more">
+            <h2>{{.Title}}</h2>
+            <p><strong>Алгоритм анализа:</strong> {{.Algorithm}}</p>
+            {{if .Description}}
+            <p>{{.Description}}</p>
+            {{end}}
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

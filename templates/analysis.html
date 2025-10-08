@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заявка #{{.ID_order}} - Анализ композиционного центра</title>
+    <link rel="stylesheet" href="/static/styles/style.css">
+</head>
+<body>
+
+<header class="header">
+    <div class="header__title">Анализ композиционного центра</div>
+    <a href="/experts" class="header__home-button">Домой</a>
+</header>
+
+<main class="order-page">
+    <div class="order-container">
+
+        <!-- Глобальный результат -->
+        {{if .ResultX}}
+        <div class="global-result-card">
+            <h2>Общие координаты композиционного центра</h2>
+            <p>X: {{.ResultX}}, Y: {{.ResultY}}</p>
+        </div>
+        {{end}}
+
+        <!-- Список выбранных экспертов -->
+        <section class="basket-grid">
+            {{- if .ExpertsLinks }}
+                {{- range .ExpertsLinks }}
+                <div class="card basket-card">
+                    <div class="basket-card__image">
+                        <img src="{{.ArtExpert.ImgURL}}" alt="{{.ArtExpert.Title}}">
+                    </div>
+                    <div class="basket-card__info">
+                        <h3>{{.ArtExpert.Title}}</h3>
+                        {{if .ArtExpert.Description}}
+                        <p>{{.ArtExpert.Description}}</p>
+                        {{end}}
+                    </div>
+                </div>
+                {{- end }}
+            {{- else }}
+                <p>В этой заявке пока нет выбранных экспертов.</p>
+            {{- end }}
+        </section>
+
+    </div>
+</main>
+
+</body>
+</html>

@@ -1,4 +1,15 @@
 /* Header */
+* {
+    padding: 0;
+    margin: 0;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+}
+
 .header {
     display: flex;
     justify-content: space-between;
@@ -215,4 +226,46 @@
     margin: 0.25rem 0;
     font-size: 1rem;
     line-height: 1.4;
+}
+
+.artcenter-detail-wrapper-more {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 100vh;
+}
+
+
+.artcenter-detail-card-more {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    height: max-content;
+    padding: 150px;
+}
+
+.card-more {
+    width: 100%;
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    height: max-content;
+    padding-inline: 50px;
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
+
+.card-image-more {
+    width: 450px;
+    height: 350px;
+    object-fit: cover;
+}
+
+.image-more {
+    width: 450px;
+    height: 350px;
+}
+
+.card-content-more {
+    font-size: large;
 }

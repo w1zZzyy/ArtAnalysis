@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Список произведений - Анализ композиционного центра</title>
-    <link rel="stylesheet" href="../static/style.css">
+    <title>Список экспертов - Анализ композиционного центра</title>
+    <link rel="stylesheet" href="/static/styles/style.css">
     <style>
-        /* Стили для корзины */
         .basket-bar {
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 1.5rem 0;
         }
-
         .basket-link {
             position: relative;
             display: flex;
@@ -21,21 +19,19 @@
             text-decoration: none;
             color: #333;
         }
-
         .basket-icon {
             width: 40px;
             height: 40px;
-            fill: #3498db; /* синий цвет корзины */
+            fill: #3498db;
         }
-
         .basket-count {
             position: absolute;
-            top: -4px;      /* чуть выше иконки */
-            right: 2px;     /* чуть правее */
-            color: #1f3b73; /* глубокий тёмно-синий, хорошо виден на фоне */
+            top: -4px;
+            right: 2px;
+            color: #1f3b73;
             font-size: 0.8rem;
             font-weight: bold;
-            text-shadow: 0 0 2px rgba(255,255,255,0.4); /* делает цифру чётче */
+            text-shadow: 0 0 2px rgba(255,255,255,0.4);
         }
     </style>
 </head>
@@ -43,33 +39,41 @@
 
 <header class="header">
     <div class="header__title">Анализ композиционного центра</div>
-    <a href="/artcenters" class="header__home-button">Домой</a>
+    <a href="/experts" class="header__home-button">Домой</a>
 </header>
 
 <div class="basket-bar">
-    <a href="/basket/{{.BasketID}}" class="basket-link">
+    <a href="/analysis_order/{{.orderID}}" class="basket-link">
         <svg class="basket-icon" viewBox="0 0 24 24">
             <path d="M7 18c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2zm10 0c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2zm1.104-2.447l1.447-8.553h-16l1.447 8.553c.104.617.641 1.447 1.449 1.447h10.208c.808 0 1.345-.83 1.449-1.447zm-13.104-10.553v-2h2v2h8v-2h2v2h2v2h-16v-2h2z"/>
         </svg>
-        <span class="basket-count">{{.BasketCount}}</span>
+        <span class="basket-count">{{.expertsCount}}</span>
     </a>
 </div>
 
-<form class="search-form" method="GET" action="/artcenters">
-    <input type="text" name="q" placeholder="Поиск услуг..." class="search-form__input">
+<form class="search-form" method="GET" action="/experts">
+    <input type="text" name="expertSearching" placeholder="Поиск экспертов..." class="search-form__input" value="{{.expertSearching}}">
     <button type="submit" class="search-form__button">Найти</button>
 </form>
 
 <section class="artcenters-grid">
-    {{range .ArtCenters}}
+    {{range .experts}}
     <div class="card artcenter-card">
         <div class="card-image">
-            <img src="{{.ArtImageURL}}" alt="{{.Title}}">
+            <img src="{{.ImgURL}}" alt="{{.Title}}">
         </div>
         <div class="card-content">
             <h3>{{.Title}}</h3>
-            <p><strong>Алгоритм:</strong> {{.Algorithm}}</p>
-            <a href="/artcenter/{{.ArtID}}" class="card-button">Подробнее</a>
+            <p><strong>Алгоритм анализа:</strong> {{.Algorithm}}</p>
+            {{if .Description}}
+            <p>{{.Description}}</p>
+            {{end}}
+            <!-- Ссылка на детальную страницу эксперта -->
+            <a href="/expert/{{.ID_artcenter}}" class="card-button">Подробнее</a>
+            <!-- Кнопка добавления в черновик -->
+            <form method="POST" action="/analysis_order/add/expert/{{.ID_artcenter}}" style="margin-top: 0.5rem;">
+                <button type="submit" class="card-button">Добавить в заявку</button>
+            </form>
         </div>
     </div>
     {{end}}
