@@ -48,10 +48,10 @@
             <img class="image-more" src="{{.ImgURL}}" alt="{{.Title}}">
         </div>
         <div class="card-content-more">
-            <h2>{{.Title}}</h2>
-            <p><strong>Алгоритм анализа:</strong> {{.Algorithm}}</p>
+            <h2 class="card-title-more">{{.Title}}</h2>
+            <p class="card-analysis-more"><strong>Алгоритм:</strong> {{.Algorithm}}</p>
             {{if .Description}}
-            <p>{{.Description}}</p>
+            <p class="card-description-more" style="margin-top: 25px;">{{.Description}}</p>
             {{end}}
         </div>
     </div>

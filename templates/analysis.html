@@ -16,6 +16,14 @@
 <main class="order-page">
     <div class="order-container">
 
+        <!-- Панель действий -->
+        <div class="order-actions">
+            <h1>Заявка #{{.ID_order}}</h1>
+            <form method="POST" action="/analysis_order/{{.ID_order}}/delete" class="delete-form">
+                <button type="submit" class="delete-button">Удалить заявку</button>
+            </form>
+        </div>
+
         <!-- Глобальный результат -->
         {{if .ResultX}}
         <div class="global-result-card">

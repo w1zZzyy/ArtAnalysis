@@ -19,6 +19,16 @@ func main() {
 		panic("failed to connect database")
 	}
 
+	sqlBytesRm, err := os.ReadFile("build/down.sql")
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.Exec(string(sqlBytesRm)).Error
+	if err != nil {
+		panic(err)
+	}
+
 	// Migrate the schema
 	err = db.AutoMigrate(
 		&model.Users{},
