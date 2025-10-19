@@ -58,7 +58,12 @@ func (h *Handler) GetOrder(c *gin.Context) {
 
 	order, err := h.Repository.GetOrderWithExperts(uint(orderID))
 	if err != nil {
-		h.errorHandler(c, http.StatusNotFound, err)
+		c.HTML(http.StatusOK, "analysis.html", gin.H{
+			"ID_order":     nil, // можно показать ID даже если нет данных
+			"ExpertsLinks": nil,
+			"ResultX":      nil,
+			"ResultY":      nil,
+		})
 		return
 	}
 

@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Заявка #{{.ID_order}} - Анализ композиционного центра</title>
+    <title>
+        {{if .ID_order}}Заявка #{{.ID_order}} - Анализ композиционного центра{{else}}Ваша корзина пуста - Анализ композиционного центра{{end}}
+    </title>
     <link rel="stylesheet" href="/static/styles/style.css">
 </head>
 <body>
@@ -18,10 +20,14 @@
 
         <!-- Панель действий -->
         <div class="order-actions">
-            <h1>Заявка #{{.ID_order}}</h1>
-            <form method="POST" action="/analysis_order/{{.ID_order}}/delete" class="delete-form">
-                <button type="submit" class="delete-button">Удалить заявку</button>
-            </form>
+            {{if .ID_order}}
+                <h1>Заявка #{{.ID_order}}</h1>
+                <form method="POST" action="/analysis_order/{{.ID_order}}/delete" class="delete-form">
+                    <button type="submit" class="delete-button">Удалить заявку</button>
+                </form>
+            {{else}}
+                <h1>Ваша корзина пуста</h1>
+            {{end}}
         </div>
 
         <!-- Глобальный результат -->
@@ -51,7 +57,10 @@
                 </div>
                 {{- end }}
             {{- else }}
-                <p>В этой заявке пока нет выбранных экспертов.</p>
+            <div class="empty-basket">
+                <img src="/static/images/empty-box.svg" alt="Пустая корзина" class="empty-basket__img">
+                <p class="empty-basket__text">В этой заявке пока нет выбранных экспертов.</p>
+            </div>
             {{- end }}
         </section>
 

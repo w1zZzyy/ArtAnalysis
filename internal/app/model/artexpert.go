@@ -6,6 +6,7 @@ type ArtExpert struct {
 	Description  string `gorm:"column:description;not null"`
 	Status       bool   `gorm:"column:status;not null;default:true"`
 	ImgURL       *string
+	Name         string `gorm:"column:name;not null"`
 	Algorithm    string `gorm:"column:algorithm;not null"`
 
 	Orders []ExpertsToOrders `gorm:"foreignKey:ID_artcenter;references:ID_artcenter"`

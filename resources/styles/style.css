@@ -184,7 +184,37 @@ html, body {
     font-size: 1.2rem;
     font-weight: normal;
 }
+.empty-basket {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    gap: 1.5rem;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    border: 1px dashed #ced4da;
+    color: #6c757d;
+    text-align: center;
+    margin-top: 2rem;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
 
+.empty-basket:hover {
+    background-color: #f1f3f5;
+    transform: translateY(-2px);
+}
+
+.empty-basket__img {
+    width: 120px;
+    height: 120px;
+    opacity: 0.7;
+}
+
+.empty-basket__text {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
 
 /* ===== УСЛУГА ===== */
 .artcenter-detail-wrapper {
@@ -324,4 +354,8 @@ html, body {
 
 .card-analysis-more {
     font-size: 25px;
+}
+
+.card-name-more {
+    font-size: 30px;
 }
