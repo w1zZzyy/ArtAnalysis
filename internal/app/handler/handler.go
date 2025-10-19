@@ -21,10 +21,9 @@ func NewHandler(r *repository.Repository) *Handler {
 func (h *Handler) RegisterHandler(r *gin.Engine) {
 	r.GET("/experts", h.GetArtExperts)
 	r.GET("/expert/:id", h.GetArtExpertByID)
-
-	r.GET("/analysis_order/:id", h.GetOrder)
-	r.POST("/analysis_order/add/expert/:id_expert", h.AddExpertToOrder) // ORM
-	r.POST("/analysis_order/:order_id/delete", h.DeleteOrder)           // логическое удаление заявки
+	r.GET("/artcenter/:id", h.GetOrder)
+	r.POST("/artcenter/add/expert/:id_expert", h.AddExpertToOrder) // ORM
+	r.POST("/artcenter/:order_id/delete", h.DeleteOrder)           // логическое удаление заявки
 }
 
 // RegisterStatic регистрирует статику и шаблоны
