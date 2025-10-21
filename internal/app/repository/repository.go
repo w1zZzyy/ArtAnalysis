@@ -6,7 +6,8 @@ import (
 )
 
 type Repository struct {
-	db *gorm.DB
+	db    *gorm.DB
+	minio *minioClient
 }
 
 func New(dsn string) (*Repository, error) {
