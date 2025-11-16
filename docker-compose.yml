@@ -93,6 +93,15 @@ services:
     depends_on:
       - postgres
 
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass password
+    volumes:
+      - redis-data:/data
+
 volumes:
   data1-1:
   data1-2:
@@ -103,3 +112,5 @@ volumes:
   data4-1:
   data4-2:
   postgres_data:
+  redis-data:
+    driver: local

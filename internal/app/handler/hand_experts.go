@@ -1,7 +1,11 @@
 package handler
 
 import (
-	"context"
+	"errors"
+	"mime/multipart"
+	"path/filepath"
+	"regexp"
+	"time"
 
 	"github.com/w1zZzyy22/art-analysis/internal/app/model"
 
@@ -83,30 +87,86 @@ type expertCreateRequest struct {
 	Status      *bool  `json:"status"`
 }
 
+// ApiExpertsList godoc
+// @Summary      Получить список экспертов
+// @Description  Возвращает список всех экспертов. Поддерживает фильтрацию по названию.
+// @Tags         Experts
+// @Produce      json
+// @Param        title query string false "Фильтр по названию эксперта (подстрока)"
+// @Success      200 {array} DTO_Resp_Expert
+// @Failure      500 {object} map[string]string "Внутренняя ошибка сервера"
+// @Router       /api/experts [get]
 func (h *Handler) ApiExpertsList(ctx *gin.Context) {
 	title := ctx.Query("title")
+
 	experts, err := h.Repository.ListExperts(title)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusOK, gin.H{"items": experts})
+
+	var representExperts []DTO_Resp_Expert
+	for _, expert := range experts {
+		representExperts = append(representExperts, DTO_Resp_Expert{
+			ID_artcenter: expert.ID_artcenter,
+			Title:        expert.Title,
+			Description:  expert.Description,
+			Status:       expert.Status,
+			Name:         expert.Name,
+			Algorithm:    expert.Algorithm,
+			ImgURL:       expert.ImgURL,
+		})
+	}
+
+	ctx.JSON(http.StatusOK, representExperts)
 }
 
+// ApiGetExpertByID godoc
+// @Summary      Получить эксперта по ID
+// @Description  Возвращает полную информацию об эксперте по его идентификатору.
+// @Tags         Experts
+// @Produce      json
+// @Param        id path int true "ID эксперта"
+// @Success      200 {object} model.ArtExpert
+// @Failure      400 {object} map[string]string "Некорректный ID"
+// @Failure      404 {object} map[string]string "Эксперт не найден"
+// @Failure      500 {object} map[string]string "Внутренняя ошибка сервера"
+// @Router       /api/experts/{id} [get]
 func (h *Handler) ApiGetExpertByID(ctx *gin.Context) {
-	id, _ := strconv.Atoi(ctx.Param("id"))
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil || id <= 0 {
+		h.errorHandler(ctx, http.StatusBadRequest, err)
+		return
+	}
 	expert, err := h.Repository.GetExpertByID(id)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusNotFound, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusOK, expert)
+	ctx.JSON(http.StatusOK, expert)
 }
 
+// ApiAddExpert godoc
+// @Summary      Создать нового эксперта
+// @Description  Создаёт нового эксперта с указанными атрибутами.
+// @Tags         Experts
+// @Accept       json
+// @Produce      json
+// @Param        expert body DTO_Req_ExpertCreate true "Данные нового эксперта"
+// @Success      201 {object} model.ArtExpert
+// @Failure      400 {object} map[string]string "Некорректные данные"
+// @Failure      500 {object} map[string]string "Ошибка при создании эксперта"
+// @Router       /api/experts [post]
 func (h *Handler) ApiAddExpert(ctx *gin.Context) {
-	var req expertCreateRequest
+	var req DTO_Req_ExpertCreate
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
+		return
+	}
+
+	// простая валидация обязательных полей
+	if req.Title == "" || req.Description == "" || req.Name == "" || req.Algorithm == "" {
+		h.errorHandler(ctx, http.StatusBadRequest, errors.New("missing required fields"))
 		return
 	}
 
@@ -116,6 +176,7 @@ func (h *Handler) ApiAddExpert(ctx *gin.Context) {
 		Name:        req.Name,
 		Algorithm:   req.Algorithm,
 	}
+
 	if req.Status != nil {
 		expert.Status = *req.Status
 	}
@@ -124,60 +185,205 @@ func (h *Handler) ApiAddExpert(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusCreated, expert)
+
+	ctx.JSON(http.StatusCreated, expert)
 }
 
+// ApiUpdateExpert godoc
+// @Summary      Обновить эксперта
+// @Description  Обновляет параметры существующего эксперта.
+// @Tags         Experts
+// @Accept       json
+// @Produce      json
+// @Param        id     path int true "ID эксперта"
+// @Param        expert body DTO_Req_ExpertCreate true "Обновлённые данные эксперта"
+// @Success      200 {object} model.ArtExpert
+// @Failure      400 {object} map[string]string "Некорректные данные или ID"
+// @Failure      500 {object} map[string]string "Ошибка при обновлении эксперта"
+// @Router       /api/experts/{id} [put]
 func (h *Handler) ApiUpdateExpert(ctx *gin.Context) {
-	id, _ := strconv.Atoi(ctx.Param("id"))
-	var req expertCreateRequest
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil || id <= 0 {
+		h.errorHandler(ctx, http.StatusBadRequest, err)
+		return
+	}
+
+	var req DTO_Req_ExpertCreate
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
-	updated, err := h.Repository.UpdateExpert(uint(id), req.Title, req.Description, req.Name, req.Algorithm, req.Status)
+
+	updated, err := h.Repository.UpdateExpert(
+		uint(id),
+		req.Title,
+		req.Description,
+		req.Name,
+		req.Algorithm,
+		req.Status,
+	)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusOK, updated)
+
+	ctx.JSON(http.StatusOK, updated)
 }
 
+// ApiDeleteExpert godoc
+// @Summary      Удалить эксперта
+// @Description  Полностью удаляет эксперта по ID.
+// @Tags         Experts
+// @Produce      json
+// @Param        id path int true "ID эксперта"
+// @Success      200 {object} DTO_Resp_SimpleID
+// @Failure      400 {object} map[string]string "Некорректный ID"
+// @Failure      500 {object} map[string]string "Ошибка при удалении эксперта"
+// @Router       /api/experts/{id} [delete]
 func (h *Handler) ApiDeleteExpert(ctx *gin.Context) {
-	id, _ := strconv.Atoi(ctx.Param("id"))
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil || id <= 0 {
+		h.errorHandler(ctx, http.StatusBadRequest, err)
+		return
+	}
+
 	if err := h.Repository.DeleteExpert(uint(id)); err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusOK, gin.H{"id": id})
+
+	ctx.JSON(http.StatusOK, DTO_Resp_SimpleID{ID: id})
 }
 
+// ApiAddExpertToDraftOrder godoc
+// @Summary      Добавить эксперта в черновик заявки
+// @Description  Добавляет указанного эксперта в текущий черновой заказ пользователя.
+// @Tags         Experts
+// @Produce      json
+// @Param        id path int true "ID эксперта"
+// @Success      201 {object} DTO_Resp_OrderExpertLink
+// @Failure      400 {object} map[string]string "Некорректный ID эксперта"
+// @Failure      401 {object} map[string]string "Требуется авторизация"
+// @Failure      500 {object} map[string]string "Ошибка при добавлении эксперта"
+// @Router       /api/draft/experts/{id} [post]
 func (h *Handler) ApiAddExpertToDraftOrder(ctx *gin.Context) {
-	expertID, _ := strconv.Atoi(ctx.Param("id"))
-	var body struct {
-		OrderID uint `json:"order_id"`
-	}
-	if err := ctx.ShouldBindJSON(&body); err != nil {
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil || id <= 0 {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
-	if err := h.Repository.AddExpertToDraftOrder(uint(expertID), body.OrderID); err != nil {
-		h.errorHandler(ctx, http.StatusInternalServerError, err)
+
+	// Получаем ID пользователя из контекста
+	userID, err := getUserIDFromContext(ctx)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusUnauthorized, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusCreated, gin.H{"expert_id": expertID, "order_id": body.OrderID})
+
+	// Получаем или создаем черновик заявки
+	order, err := h.Repository.GetDraftOrder(userID)
+	if err != nil {
+		newOrder := model.AnalysisOrder{
+			ID_creator:  userID,
+			OrderStatus: model.StatusDraft,
+			DateCreated: time.Now(),
+		}
+		if createErr := h.Repository.CreateOrder(&newOrder); createErr != nil {
+			h.errorHandler(ctx, http.StatusInternalServerError, createErr)
+			return
+		}
+		order = &newOrder
+	}
+
+	// Добавляем эксперта в заявку
+	if err := h.Repository.AddExpertToOrder(order.ID_order, uint(id)); err != nil {
+		h.errorHandler(ctx, http.StatusBadRequest, err)
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, DTO_Resp_OrderExpertLink{
+		OrderID:  order.ID_order,
+		ExpertID: id,
+	})
 }
 
+// ApiGetCurrQTask godoc
+// @Summary      Получить информацию о текущем черновом заказе
+// @Description  Возвращает ID текущего чернового заказа и количество добавленных экспертов.
+// @Tags         AnalysisOrders
+// @Produce      json
+// @Success      200 {object} DTO_Resp_CurrTaskInfo
+// @Failure      401 {object} map[string]string "Требуется авторизация"
+// @Failure      500 {object} map[string]string "Ошибка при получении данных"
+// @Router       /api/analysis_order/current [get]
+func (h *Handler) ApiGetCurrQTask(ctx *gin.Context) {
+	userID, err := getUserIDFromContext(ctx)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusUnauthorized, errors.New("требуется авторизация"))
+		return
+	}
+	draftTask, _ := h.Repository.GetDraftOrder(userID)
+	var orderID uint = 0
+	var expertsCount int = 0
+	if draftTask != nil {
+		fullTask, err := h.Repository.GetOrderWithExperts(draftTask.ID_order)
+		if err == nil {
+			orderID = fullTask.ID_order
+			expertsCount = len(fullTask.ExpertsLinks)
+		}
+	}
+	ctx.JSON(http.StatusOK, DTO_Resp_CurrTaskInfo{OrderID: orderID, ExpertsCount: expertsCount})
+}
+
+// ApiUploadExpertImage godoc
+// @Summary      Загрузить изображение эксперта
+// @Description  Загружает изображение и сохраняет URL в базе данных.
+// @Tags         Experts
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        id   path int true "ID эксперта"
+// @Param        file formData file true "Изображение эксперта"
+// @Success      201 {object} DTO_Resp_UploadImg
+// @Failure      400 {object} map[string]string "Некорректный ID или отсутствует файл"
+// @Failure      500 {object} map[string]string "Ошибка при загрузке изображения"
+// @Router       /api/experts/{id}/image [post]
 func (h *Handler) ApiUploadExpertImage(ctx *gin.Context) {
-	id, _ := strconv.Atoi(ctx.Param("id"))
-	file, err := ctx.FormFile("file")
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil || id <= 0 {
+		h.errorHandler(ctx, http.StatusBadRequest, err)
+		return
+	}
+
+	fileHeader, err := ctx.FormFile("file")
 	if err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
-	url, err := h.Repository.SaveExpertImage(context.Background(), uint(id), file)
+
+	// Загрузка изображения и обновление записи в базе
+	imageURL, err := h.Repository.SaveExpertImage(ctx, uint(id), fileHeader)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-	h.okJSON(ctx, http.StatusCreated, gin.H{"id": id, "image": url})
+
+	ctx.JSON(http.StatusCreated, DTO_Resp_UploadImg{
+		ID:    uint(id),
+		Image: imageURL,
+	})
+}
+
+func generateSafeImageName(fh *multipart.FileHeader) string {
+	base := fh.Filename
+	ext := filepath.Ext(base)
+	name := base
+	re := regexp.MustCompile(`[^a-zA-Z0-9_-]+`)
+	slug := re.ReplaceAllString(name, "-")
+	if slug == "" {
+		slug = "image"
+	}
+	if ext == "" {
+		ext = ".png"
+	}
+	return slug + ext
 }

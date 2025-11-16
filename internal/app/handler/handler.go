@@ -1,70 +1,102 @@
 package handler
 
 import (
+	"github.com/w1zZzyy22/art-analysis/internal/app/config"
+	appredis "github.com/w1zZzyy22/art-analysis/internal/app/redis"
 	"github.com/w1zZzyy22/art-analysis/internal/app/repository"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
+// Handler структура обработчиков API
+// @Description Основная структура содержащая зависимости обработчиков
 type Handler struct {
 	Repository *repository.Repository
+	Redis      *appredis.Client
+	JWTConfig  *config.JWTConfig
 }
 
-func NewHandler(r *repository.Repository) *Handler {
+// NewHandler создает новый экземпляр Handler
+// @Description Конструктор для создания экземпляра Handler с зависимостями
+func NewHandler(r *repository.Repository, redis *appredis.Client, jwtConfig *config.JWTConfig) *Handler {
 	return &Handler{
 		Repository: r,
+		Redis:      redis,
+		JWTConfig:  jwtConfig,
 	}
 }
 
-// RegisterHandler регистрирует маршруты для работы с экспертами и заявками
+// RegisterHandler регистрирует все маршруты API
+// @Description Функция для регистрации всех маршрутов приложения с группировкой по правам доступа
 func (handler *Handler) RegisterHandler(r *gin.Engine) {
-	r.GET("/experts", handler.GetArtExperts)
+	// Публичные эндпоинты (без авторизации)
+	r.POST("/api/auth/login", handler.Login)
+	r.POST("/api/users/register", handler.Register)
+
+	// experts
 	r.GET("/expert/:id", handler.GetArtExpertByID)
 	r.GET("/analysis_order/:id", handler.GetOrder)
-	r.POST("/analysis_order/add/expert/:id_expert", handler.AddExpertToOrder)
-	r.POST("/analysis_order/:order_id/delete", handler.DeleteOrder)
 
-	// JSON API routes (exactly 21)
+	// HTML
+	r.GET("/experts", handler.GetArtExperts)
 
-	// Experts (7)
-	r.GET("/api/experts", handler.ApiExpertsList)                      // список экспертов с фильтрацией (по алгоритму)
-	r.GET("/api/experts/:id", handler.ApiGetExpertByID)                // получить одного эксперта
-	r.POST("/api/experts", handler.ApiAddExpert)                       // добавить нового эксперта
-	r.PUT("/api/experts/:id", handler.ApiUpdateExpert)                 // изменить данные эксперта
-	r.DELETE("/api/experts/:id", handler.ApiDeleteExpert)              // удалить эксперта (и изображение)
-	r.POST("/api/draft/experts/:id", handler.ApiAddExpertToDraftOrder) // добавить эксперта в заявку-черновик
-	r.POST("/api/experts/:id/image", handler.ApiUploadExpertImage)     // загрузить/заменить изображение эксперта (Minio)
+	// Эндпоинты, доступные только модераторам
+	moderator := r.Group("/")
+	moderator.Use(handler.AuthMiddleware, handler.ModeratorMiddleware)
+	{
+		// Experts
+		moderator.POST("/api/experts", handler.ApiAddExpert)
+		moderator.PUT("/api/experts/:id", handler.ApiUpdateExpert)
+		moderator.DELETE("/api/experts/:id", handler.ApiDeleteExpert)
+		moderator.POST("/api/experts/:id/image", handler.ApiUploadExpertImage)
 
-	// Analysis orders (7)
-	r.GET("/api/analysis_orders/current", handler.ApiGetCurrentDraftOrder)     // иконка корзины (черновик + кол-во экспертов)
-	r.GET("/api/analysis_orders", handler.ApiListAnalysisOrders)               // список заявок с фильтрацией по дате и статусу
-	r.GET("/api/analysis_orders/:id", handler.ApiGetAnalysisOrderByID)         // получить одну заявку (с экспертами)
-	r.PUT("/api/analysis_orders/:id", handler.ApiUpdateAnalysisOrder)          // изменить поля заявки
-	r.PUT("/api/analysis_orders/:id/form", handler.ApiFormAnalysisOrder)       // сформировать заявку (создателем)
-	r.PUT("/api/analysis_orders/:id/resolve", handler.ApiResolveAnalysisOrder) // завершить/отклонить заявку (модератор)
-	r.DELETE("/api/analysis_orders/:id", handler.ApiDeleteAnalysisOrder)       // логическое удаление заявки
+		// Analysis orders
+		moderator.PUT("/api/analysis_orders/:id/resolve", handler.ApiResolveAnalysisOrder)
+		moderator.DELETE("/api/analysis_orders/:id", handler.ApiDeleteAnalysisOrder)
+	}
 
-	// m-m (2)
-	r.DELETE("/api/orders/:order_id/experts/:expert_id", handler.ApiRemoveExpertFromOrder) // удалить эксперта из заявки
-	r.PUT("/api/orders/:order_id/experts/:expert_id", handler.ApiUpdateExpertInOrder)      // изменить данные эксперта в заявке (например координаты)
+	// Эндпоинты, доступные всем авторизованным пользователям
+	auth := r.Group("/")
+	auth.Use(handler.AuthMiddleware)
+	{
+		// Users
+		auth.POST("/api/auth/logout", handler.Logout)
+		auth.GET("/api/users/me", handler.ApiMe)
+		auth.PUT("/api/users/me", handler.ApiUpdateMe)
 
-	// Users (5)
-	r.POST("/api/users/register", handler.ApiRegisterUser) // регистрация нового пользователя
-	r.GET("/api/users/me", handler.ApiGetMe)               // данные текущего пользователя
-	r.PUT("/api/users/me", handler.ApiUpdateMe)            // обновление данных пользователя
-	r.POST("/api/auth/login", handler.ApiLogin)            // аутентификация
-	r.POST("/api/auth/logout", handler.ApiLogout)          // деавторизация
+		// Experts (только просмотр и черновики)
+		auth.GET("/api/experts", handler.ApiExpertsList)
+		auth.GET("/api/experts/:id", handler.ApiGetExpertByID)
+		auth.POST("/api/draft/experts/:id", handler.ApiAddExpertToDraftOrder)
+
+		// Analysis orders (создание, редактирование, просмотр)
+		auth.GET("/api/analysis_orders/current", handler.ApiGetCurrentDraftOrder)
+		auth.GET("/api/analysis_orders", handler.ApiListAnalysisOrders)
+		auth.GET("/api/analysis_orders/:id", handler.ApiGetAnalysisOrderByID)
+		auth.PUT("/api/analysis_orders/:id", handler.ApiUpdateAnalysisOrder)
+		auth.PUT("/api/analysis_orders/:id/form", handler.ApiFormAnalysisOrder)
+
+		// Many-to-Many: заявки ↔ эксперты
+		auth.DELETE("/api/orders/:order_id/experts/:expert_id", handler.ApiRemoveExpertFromOrder)
+		auth.PUT("/api/orders/:order_id/experts/:expert_id", handler.ApiUpdateExpertInOrder)
+
+		// HTML
+		auth.POST("/analysis_order/add/expert/:id_expert", handler.AddExpertToOrder)
+		auth.POST("/analysis_order/:order_id/delete", handler.DeleteOrder)
+	}
 
 }
 
-// RegisterStatic регистрирует статику и шаблоны
+// RegisterStatic регистрирует статические файлы и шаблоны
+// @Description Настраивает обслуживание статических файлов и HTML шаблонов
 func (h *Handler) RegisterStatic(router *gin.Engine) {
 	router.LoadHTMLGlob("templates/*")
 	router.Static("/static", "./resources")
 }
 
-// errorHandler удобный вывод ошибок
+// errorHandler - внутренний вспомогательный метод для обработки ошибок
+// Не экспортируется в Swagger документацию
 func (h *Handler) errorHandler(ctx *gin.Context, errorStatusCode int, err error) {
 	logrus.Error(err.Error())
 	ctx.JSON(errorStatusCode, gin.H{
@@ -73,6 +105,8 @@ func (h *Handler) errorHandler(ctx *gin.Context, errorStatusCode int, err error)
 	})
 }
 
+// okJSON - внутренний вспомогательный метод для успешных ответов
+// Не экспортируется в Swagger документацию
 func (h *Handler) okJSON(ctx *gin.Context, statusCode int, payload interface{}) {
 	ctx.JSON(statusCode, gin.H{
 		"status": "ok",

@@ -10,7 +10,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// GetDraftOrder возвращает черновик заявки для указанного пользователя (создателя).
 func (r *Repository) GetDraftOrder(userID uint) (*model.AnalysisOrder, error) {
 	var order model.AnalysisOrder
 
@@ -22,14 +21,14 @@ func (r *Repository) GetDraftOrder(userID uint) (*model.AnalysisOrder, error) {
 	return &order, nil
 }
 
-// CreateOrder создаёт новую заявку на анализ композиционного центра.
 func (r *Repository) CreateOrder(order *model.AnalysisOrder) error {
+	if order.DateCreated.IsZero() {
+		order.DateCreated = time.Now()
+	}
 	return r.db.Create(order).Error
 }
 
-// AddExpertToOrder добавляет эксперта в заявку (создает запись в таблице m-m).
 func (r *Repository) AddExpertToOrder(orderID, expertID uint) error {
-	// Проверяем, нет ли уже такого эксперта в заявке
 	var count int64
 	r.db.Model(&model.ExpertsToOrders{}).
 		Where("id_order = ? AND id_artcenter = ?", orderID, expertID).
@@ -45,7 +44,6 @@ func (r *Repository) AddExpertToOrder(orderID, expertID uint) error {
 	return r.db.Create(&link).Error
 }
 
-// GetOrderWithExperts получает заявку со всеми экспертами и их связями.
 func (r *Repository) GetOrderWithExperts(orderID uint) (*model.AnalysisOrder, error) {
 	var order model.AnalysisOrder
 
@@ -87,8 +85,8 @@ func (r *Repository) GetCurrentDraftOrder(userID uint) (*model.AnalysisOrder, in
 	return &order, count, nil
 }
 
-func (r *Repository) ListAnalysisOrders(status, from, to string) ([]model.AnalysisOrder, error) {
-	var orders []model.AnalysisOrder
+func (r *Repository) ListAnalysisOrders(status, from, to string) ([]*model.AnalysisOrder, error) {
+	var orders []*model.AnalysisOrder
 	q := r.db.Preload("ExpertsLinks.ArtExpert").Preload("User")
 	if status != "" {
 		q = q.Where("order_status = ?", status)
@@ -102,6 +100,32 @@ func (r *Repository) ListAnalysisOrders(status, from, to string) ([]model.Analys
 	if err := q.Find(&orders).Error; err != nil {
 		return nil, err
 	}
+	return orders, nil
+}
+
+func (r *Repository) ListTaskByUser(userID uint, status, from, to string) ([]*model.AnalysisOrder, error) {
+	var orders []*model.AnalysisOrder
+	// Включим логирование SQL
+	//r.db = r.db.Debug()
+	query := r.db.Preload("GatesDegrees.Gate").Where("id_user = ?", userID)
+
+	if status != "" {
+		query = query.Where("order_status = ?", status)
+	} else {
+		query = query.Where("order_status NOT IN ?", []string{model.StatusDeleted, model.StatusDraft})
+	}
+	if from != "" {
+		query = query.Where("date_created >= ?", from)
+	}
+	if to != "" {
+		query = query.Where("date_created <= ?", to)
+	}
+
+	err := query.Order("date_created DESC").Find(&orders).Error
+	if err != nil {
+		return nil, err
+	}
+
 	return orders, nil
 }
 
