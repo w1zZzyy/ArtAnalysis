@@ -1,6 +1,7 @@
 INSERT INTO public.users (login, password, is_moderator) VALUES
-('user1', 'password1', false),
-('moderator1', 'modpassword', true);
+('user1', '$2a$10$NYcHfi5m9PK1wcop1Dnu.eqxIGvLJbNigg1BQwjW3UkR4vfvdN22i', false), -- password1
+('moderator1', '$2a$10$NnrzLn4eE5d2sLLGP1PG4.FZNaTsvH//nV/BiP6XEgSLxjEmJiS8a', true); -- modpassword 
+
 
 INSERT INTO public.art_experts (id_artcenter, title, description, status, img_url, algorithm, name) VALUES
 (1, 'Анализ композиционного центра картины', 

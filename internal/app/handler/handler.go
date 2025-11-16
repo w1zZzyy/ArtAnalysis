@@ -31,8 +31,8 @@ func NewHandler(r *repository.Repository, redis *appredis.Client, jwtConfig *con
 // @Description Функция для регистрации всех маршрутов приложения с группировкой по правам доступа
 func (handler *Handler) RegisterHandler(r *gin.Engine) {
 	// Публичные эндпоинты (без авторизации)
-	r.POST("/api/auth/login", handler.Login)
-	r.POST("/api/users/register", handler.Register)
+	r.POST("/login", handler.Login)
+	r.POST("/users", handler.Register)
 
 	// experts
 	r.GET("/expert/:id", handler.GetArtExpertByID)
