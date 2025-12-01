@@ -9,5 +9,5 @@ type ArtExpert struct {
 	Name         string `gorm:"column:name;not null"`
 	Algorithm    string `gorm:"column:algorithm;not null"`
 
-	Orders []ExpertsToOrders `gorm:"foreignKey:ID_artcenter;references:ID_artcenter"`
+	Orders []ExpertsToRequest `gorm:"foreignKey:ID_artcenter;references:ID_artcenter"`
 }

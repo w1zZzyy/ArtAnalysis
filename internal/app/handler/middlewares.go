@@ -5,11 +5,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/w1zZzyy22/art-analysis/internal/app/model"
-
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/w1zZzyy22/art-analysis/internal/app/model"
 )
 
 const (

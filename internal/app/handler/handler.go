@@ -35,11 +35,12 @@ func (handler *Handler) RegisterHandler(r *gin.Engine) {
 	r.POST("/users", handler.Register)
 
 	// experts
-	r.GET("/expert/:id", handler.GetArtExpertByID)
-	r.GET("/analysis_order/:id", handler.GetOrder)
+	r.GET("/api/experts", handler.ApiExpertsList)
+	r.GET("/api/experts/:id", handler.ApiGetExpertByID)
 
 	// HTML
-	r.GET("/experts", handler.GetArtExperts)
+	r.GET("/ArtAnalysis", handler.GetArtExperts)
+	r.GET("/expert_properties/:id", handler.GetArtExpertByID)
 
 	// Эндпоинты, доступные только модераторам
 	moderator := r.Group("/")
@@ -51,9 +52,8 @@ func (handler *Handler) RegisterHandler(r *gin.Engine) {
 		moderator.DELETE("/api/experts/:id", handler.ApiDeleteExpert)
 		moderator.POST("/api/experts/:id/image", handler.ApiUploadExpertImage)
 
-		// Analysis orders
-		moderator.PUT("/api/analysis_orders/:id/resolve", handler.ApiResolveAnalysisOrder)
-		moderator.DELETE("/api/analysis_orders/:id", handler.ApiDeleteAnalysisOrder)
+		// Center Request
+		moderator.PUT("/api/center_request/:id/resolve", handler.ApiResolveCenterRequest)
 	}
 
 	// Эндпоинты, доступные всем авторизованным пользователям
@@ -65,27 +65,25 @@ func (handler *Handler) RegisterHandler(r *gin.Engine) {
 		auth.GET("/api/users/me", handler.ApiMe)
 		auth.PUT("/api/users/me", handler.ApiUpdateMe)
 
-		// Experts (только просмотр и черновики)
-		auth.GET("/api/experts", handler.ApiExpertsList)
-		auth.GET("/api/experts/:id", handler.ApiGetExpertByID)
-		auth.POST("/api/draft/experts/:id", handler.ApiAddExpertToDraftOrder)
-
-		// Analysis orders (создание, редактирование, просмотр)
-		auth.GET("/api/analysis_orders/current", handler.ApiGetCurrentDraftOrder)
-		auth.GET("/api/analysis_orders", handler.ApiListAnalysisOrders)
-		auth.GET("/api/analysis_orders/:id", handler.ApiGetAnalysisOrderByID)
-		auth.PUT("/api/analysis_orders/:id", handler.ApiUpdateAnalysisOrder)
-		auth.PUT("/api/analysis_orders/:id/form", handler.ApiFormAnalysisOrder)
-
-		// Many-to-Many: заявки ↔ эксперты
-		auth.DELETE("/api/orders/:order_id/experts/:expert_id", handler.ApiRemoveExpertFromOrder)
-		auth.PUT("/api/orders/:order_id/experts/:expert_id", handler.ApiUpdateExpertInOrder)
+		// Связи
+		auth.DELETE("/api/center_request/:id/experts/:expert_id", handler.ApiRemoveExpertFromCenterRequest)
+		auth.PUT("/api/center_request/:id/experts/:expert_id", handler.ApiUpdateExpertInCenterRequest)
 
 		// HTML
-		auth.POST("/analysis_order/add/expert/:id_expert", handler.AddExpertToOrder)
-		auth.POST("/analysis_order/:order_id/delete", handler.DeleteOrder)
-	}
+		auth.GET("/center_request/:id", handler.GetCenterRequest)
+		auth.POST("/center_request/add/expert/:id_expert", handler.AddExpertToRequest)
+		auth.POST("/center_request/:id/delete", handler.DeleteCenterRequest)
 
+		// Experts
+		auth.POST("/api/draft/experts/:id", handler.ApiAddExpertToDraftCenterRequest)
+
+		// Center Request
+		auth.GET("/api/center_request/current", handler.ApiGetCurrCenterRequest)
+		auth.GET("/api/center_request", handler.ApiListCenterRequest)
+		auth.GET("/api/center_request/:id", handler.ApiGetCenterRequestByID)
+		auth.PUT("/api/center_request/:id", handler.ApiUpdateCenterRequest)
+		auth.PUT("/api/center_request/:id/form", handler.ApiFormCenterRequest)
+	}
 }
 
 // RegisterStatic регистрирует статические файлы и шаблоны

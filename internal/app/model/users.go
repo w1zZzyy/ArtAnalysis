@@ -6,5 +6,5 @@ type Users struct {
 	Password    string `gorm:"column:password;size:255;not null"`
 	IsModerator bool   `gorm:"column:is_moderator;default:false"`
 
-	Orders []AnalysisOrder `gorm:"foreignKey:ID_creator;references:ID_user" json:"-"`
+	Requests []CenterRequest `gorm:"foreignKey:ID_creator;references:ID_user" json:"-"`
 }

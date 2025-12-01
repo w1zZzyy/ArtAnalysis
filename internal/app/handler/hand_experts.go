@@ -35,23 +35,29 @@ func (h *Handler) GetArtExperts(ctx *gin.Context) {
 		return
 	}
 
+	userID, err := getUserIDFromContext(ctx)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusUnauthorized, errors.New("требуется авторизация"))
+		return
+	}
+
 	// Получаем черновик заявки для текущего пользователя
-	draftOrder, _ := h.Repository.GetDraftOrder(hardcodedUserID)
-	var orderID uint = 0
+	draftRequest, _ := h.Repository.GetDraftRequest(userID)
+	var requestID uint = 0
 	var expertsCount int = 0
 
-	if draftOrder != nil {
-		fullOrder, err := h.Repository.GetOrderWithExperts(draftOrder.ID_order)
+	if draftRequest != nil {
+		fullrequest, err := h.Repository.GetRequestWithExperts(draftRequest.ID_request)
 		if err == nil {
-			orderID = fullOrder.ID_order
-			expertsCount = len(fullOrder.ExpertsLinks)
+			requestID = fullrequest.ID_request
+			expertsCount = len(fullrequest.ExpertsLinks)
 		}
 	}
 
 	ctx.HTML(http.StatusOK, "experts_list.html", gin.H{
 		"experts":         experts,
 		"expertSearching": search,
-		"orderID":         orderID,
+		"requestID":       requestID,
 		"expertsCount":    expertsCount,
 	})
 }
@@ -79,13 +85,7 @@ func (h *Handler) GetArtExpertByID(ctx *gin.Context) {
 	ctx.HTML(http.StatusOK, "expert_properties.html", expert)
 }
 
-type expertCreateRequest struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Name        string `json:"name"`
-	Algorithm   string `json:"algorithm"`
-	Status      *bool  `json:"status"`
-}
+// ---- JSON API (services/gates) ----
 
 // ApiExpertsList godoc
 // @Summary      Получить список экспертов
@@ -164,7 +164,6 @@ func (h *Handler) ApiAddExpert(ctx *gin.Context) {
 		return
 	}
 
-	// простая валидация обязательных полей
 	if req.Title == "" || req.Description == "" || req.Name == "" || req.Algorithm == "" {
 		h.errorHandler(ctx, http.StatusBadRequest, errors.New("missing required fields"))
 		return
@@ -255,7 +254,7 @@ func (h *Handler) ApiDeleteExpert(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, DTO_Resp_SimpleID{ID: id})
 }
 
-// ApiAddExpertToDraftOrder godoc
+// ApiAddExpertToDraftCenterRequest godoc
 // @Summary      Добавить эксперта в черновик заявки
 // @Description  Добавляет указанного эксперта в текущий черновой заказ пользователя.
 // @Tags         Experts
@@ -265,74 +264,71 @@ func (h *Handler) ApiDeleteExpert(ctx *gin.Context) {
 // @Failure      400 {object} map[string]string "Некорректный ID эксперта"
 // @Failure      401 {object} map[string]string "Требуется авторизация"
 // @Failure      500 {object} map[string]string "Ошибка при добавлении эксперта"
-// @Router       /api/draft/experts/{id} [post]
-func (h *Handler) ApiAddExpertToDraftOrder(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
+// @Router       /api/draft/experts/{id_expert} [post]
+func (h *Handler) ApiAddExpertToDraftCenterRequest(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id_expert"))
 	if err != nil || id <= 0 {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
 
-	// Получаем ID пользователя из контекста
 	userID, err := getUserIDFromContext(ctx)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusUnauthorized, err)
 		return
 	}
 
-	// Получаем или создаем черновик заявки
-	order, err := h.Repository.GetDraftOrder(userID)
+	request, err := h.Repository.GetDraftRequest(userID)
 	if err != nil {
-		newOrder := model.AnalysisOrder{
-			ID_creator:  userID,
-			OrderStatus: model.StatusDraft,
-			DateCreated: time.Now(),
+		newReq := model.CenterRequest{
+			ID_creator:    userID,
+			RequestStatus: model.StatusDraft,
+			DateCreated:   time.Now(),
 		}
-		if createErr := h.Repository.CreateOrder(&newOrder); createErr != nil {
+		if createErr := h.Repository.CreateRequest(&newReq); createErr != nil {
 			h.errorHandler(ctx, http.StatusInternalServerError, createErr)
 			return
 		}
-		order = &newOrder
+		request = &newReq
 	}
 
-	// Добавляем эксперта в заявку
-	if err := h.Repository.AddExpertToOrder(order.ID_order, uint(id)); err != nil {
+	if err := h.Repository.AddExpertToRequest(request.ID_request, uint(id)); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, DTO_Resp_OrderExpertLink{
-		OrderID:  order.ID_order,
-		ExpertID: id,
+	ctx.JSON(http.StatusCreated, DTO_Resp_CenterRequestExpertLink{
+		RequestID: request.ID_request,
+		ExpertID:  id,
 	})
 }
 
-// ApiGetCurrQTask godoc
+// ApiGetCurrCenterRequest godoc
 // @Summary      Получить информацию о текущем черновом заказе
 // @Description  Возвращает ID текущего чернового заказа и количество добавленных экспертов.
 // @Tags         AnalysisOrders
 // @Produce      json
-// @Success      200 {object} DTO_Resp_CurrTaskInfo
+// @Success      200 {object} DTO_Resp_CurrCenterRequestInfo
 // @Failure      401 {object} map[string]string "Требуется авторизация"
 // @Failure      500 {object} map[string]string "Ошибка при получении данных"
-// @Router       /api/analysis_order/current [get]
-func (h *Handler) ApiGetCurrQTask(ctx *gin.Context) {
+// @Router       /api/center_request/current [get]
+func (h *Handler) ApiGetCurrCenterRequest(ctx *gin.Context) {
 	userID, err := getUserIDFromContext(ctx)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusUnauthorized, errors.New("требуется авторизация"))
 		return
 	}
-	draftTask, _ := h.Repository.GetDraftOrder(userID)
-	var orderID uint = 0
+	draftTask, _ := h.Repository.GetDraftRequest(userID)
+	var requestID uint = 0
 	var expertsCount int = 0
 	if draftTask != nil {
-		fullTask, err := h.Repository.GetOrderWithExperts(draftTask.ID_order)
+		fullTask, err := h.Repository.GetRequestWithExperts(draftTask.ID_request)
 		if err == nil {
-			orderID = fullTask.ID_order
+			requestID = fullTask.ID_request
 			expertsCount = len(fullTask.ExpertsLinks)
 		}
 	}
-	ctx.JSON(http.StatusOK, DTO_Resp_CurrTaskInfo{OrderID: orderID, ExpertsCount: expertsCount})
+	ctx.JSON(http.StatusOK, DTO_Resp_CurrCenterRequestInfo{RequestID: requestID, ExpertsCount: expertsCount})
 }
 
 // ApiUploadExpertImage godoc
@@ -368,7 +364,7 @@ func (h *Handler) ApiUploadExpertImage(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, DTO_Resp_UploadImg{
-		ID:    uint(id),
+		ID:    id,
 		Image: imageURL,
 	})
 }

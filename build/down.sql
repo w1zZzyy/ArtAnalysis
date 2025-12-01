@@ -1,4 +1,6 @@
-DROP TABLE IF EXISTS experts_to_orders;
-DROP TABLE IF EXISTS art_experts;
-DROP TABLE IF EXISTS analysis_orders;
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS experts_to_request CASCADE;
+DROP TABLE IF EXISTS experts_to_orders CASCADE;
+DROP TABLE IF EXISTS analysis_orders CASCADE;
+DROP TABLE IF EXISTS center_request CASCADE;
+DROP TABLE IF EXISTS art_experts CASCADE;
+DROP TABLE IF EXISTS users CASCADE;

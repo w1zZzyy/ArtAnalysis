@@ -41,21 +41,29 @@ INSERT INTO public.art_experts (id_artcenter, title, description, status, img_ur
     'Глеб Орлов'
 );
 
-INSERT INTO public.analysis_orders (
-    id_creator,
-    order_status,
+INSERT INTO public.center_requests (
+    id_request,
+    request_status,
     date_created,
-    result_x,
-    result_y
+    id_creator,
+    date_conclusion,
+    id_moderator,
+    request_description,
+    factor_x,
+    factor_y
 ) VALUES (
     1,
     'черновик',
     NOW(), 
-    88, 
-    92
+    1,
+    NULL,
+    NULL,
+    'тестовое описание',
+    0.1241, 
+    1.9801
 );
 
-INSERT INTO public.experts_to_orders (id_artcenter, id_order, center_x, center_y) VALUES
+INSERT INTO public.experts_to_requests (id_artcenter, id_request, center_x, center_y) VALUES
 (1, 1, 10, 22),
 (2, 1, 19, 72),
 (3, 1, 91, 14);

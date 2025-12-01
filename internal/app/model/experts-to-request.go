@@ -1,12 +1,12 @@
 package model
 
-type ExpertsToOrders struct {
+type ExpertsToRequest struct {
 	ID_artcenter uint `gorm:"primaryKey;column:id_artcenter;not null"`
-	ID_order     uint `gorm:"primaryKey;column:id_order;not null"`
+	ID_request   uint `gorm:"primaryKey;column:id_request;not null"`
 
 	CenterX *float32
 	CenterY *float32
 
 	ArtExpert     ArtExpert     `gorm:"foreignKey:ID_artcenter;references:ID_artcenter"`
-	AnalysisOrder AnalysisOrder `gorm:"foreignKey:ID_order;references:ID_order"`
+	CenterRequest CenterRequest `gorm:"foreignKey:ID_request;references:ID_request"`
 }

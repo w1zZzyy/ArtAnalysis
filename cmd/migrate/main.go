@@ -33,8 +33,8 @@ func main() {
 	err = db.AutoMigrate(
 		&model.Users{},
 		&model.ArtExpert{},
-		&model.AnalysisOrder{},
-		&model.ExpertsToOrders{},
+		&model.CenterRequest{},
+		&model.ExpertsToRequest{},
 	)
 	if err != nil {
 		panic("cant migrate db")

@@ -32,28 +32,27 @@ type DTO_Req_ExpertCreate struct {
 // @Description Обновление описания, статуса или изображения эксперта
 type DTO_Req_ExpertUpd struct {
 	Description *string `json:"description" example:"Измененное описание эксперта"`
-	Status      *bool   `json:"status" example:"false"`
 	Algorithm   *string `json:"algorithm" example:"geometric_center"`
 	ImgURL      *string `json:"img_url" example:"updated_photo.png"`
 }
 
-// DTO_Req_OrderUpd запрос обновления заявки
+// DTO_Req_CenterRequestUpd запрос обновления заявки
 // @Description Обновление полей заявки (например, статус или результаты)
-type DTO_Req_OrderUpd struct {
-	OrderStatus *string  `json:"order_status" example:"formed" enums:"draft,formed,completed,rejected"`
-	ResultX     *float32 `json:"result_x" example:"0.45"`
-	ResultY     *float32 `json:"result_y" example:"0.52"`
+type DTO_Req_CenterRequestUpd struct {
+	Description string   `json:"request_description" example:"Calculate center" binding:"required"`
+	CenterX     *float32 `json:"center_x" example:"123.45" binding:"required"`
+	CenterY     *float32 `json:"center_y" example:"234.56" binding:"required"`
 }
 
-// DTO_Req_OrderResolve запрос модератора для завершения/отклонения заявки
+// DTO_Req_CenterRequestResolve запрос модератора для завершения/отклонения заявки
 // @Description Завершение или отклонение заявки
-type DTO_Req_OrderResolve struct {
+type DTO_Req_CenterRequestResolve struct {
 	Action string `json:"action" example:"complete" enums:"complete,reject" binding:"required"`
 }
 
-// DTO_Req_UpdateExpertInOrder запрос обновления координат эксперта в заявке
+// DTO_Req_UpdateExpertInRequest запрос обновления координат эксперта в заявке
 // @Description Изменение координат композиционного центра эксперта
-type DTO_Req_UpdateExpertInOrder struct {
+type DTO_Req_UpdateExpertInRequest struct {
 	CenterX *float32 `json:"center_x" example:"123.45" binding:"required"`
 	CenterY *float32 `json:"center_y" example:"234.56" binding:"required"`
 }
@@ -72,26 +71,40 @@ type DTO_Resp_Expert struct {
 	ImgURL       *string `json:"img_url" example:"expert_photo.png"`
 }
 
-// DTO_Resp_Order ответ с данными заявки
-// @Description Полная информация о заявке с экспертами
-type DTO_Resp_Order struct {
-	ID_order      uint                   `json:"id_order" example:"5"`
-	OrderStatus   string                 `json:"order_status" example:"formed" enums:"draft,formed,completed,rejected"`
-	DateCreated   time.Time              `json:"date_created" example:"2025-11-05T12:00:00Z"`
-	DateFormed    time.Time              `json:"date_formed" example:"2025-11-06T12:00:00Z"`
-	DateCompleted time.Time              `json:"date_completed" example:"2025-11-07T12:00:00Z"`
-	ResultX       *float32               `json:"result_x" example:"0.51"`
-	ResultY       *float32               `json:"result_y" example:"0.48"`
-	ID_creator    uint                   `json:"id_creator" example:"1"`
-	ID_moderator  *uint                  `json:"id_moderator" example:"2"`
-	Experts       []DTO_Resp_OrderExpert `json:"experts"`
+// DTO_Resp_UploadImg ответ загрузки изображения
+// @Description Результат загрузки изображения для гейта
+type DTO_Resp_UploadImg struct {
+	ID    int    `json:"id" example:"1"`
+	Image string `json:"image" example:"gate_image.png"`
 }
 
-// DTO_Resp_OrderExpert связь эксперта и заявки
+// DTO_Resp_CurrCenterRequestInfo информация о текущей задаче
+// @Description Статистика по текущей задаче пользователя
+type DTO_Resp_CurrCenterRequestInfo struct {
+	RequestID    uint `json:"id_request" example:"5"`
+	ExpertsCount int  `json:"experts_count" example:"3"`
+}
+
+// DTO_Resp_Request ответ с данными заявки
+// @Description Полная информация о заявке с экспертами
+type DTO_Resp_CenterRequest struct {
+	ID_request     uint                           `json:"id_request" example:"5"`
+	ID_user        uint                           `json:"id_user" example:"1"`
+	RequestStatus  string                         `json:"request_status" example:"formed" enums:"draft,formed,completed,rejected"`
+	DateCreated    time.Time                      `json:"date_created" example:"2025-11-05T12:00:00Z"`
+	DateFormed     time.Time                      `json:"date_formed" example:"2025-11-06T12:00:00Z"`
+	DateConclusion time.Time                      `json:"date_conclusion" example:"2025-11-07T12:00:00Z"`
+	Description    string                         `gorm:"column:description" json:"description" example:"Art state calculation"`
+	FactorX        *float32                       `json:"factor_x" example:"0.51"`
+	FactorY        *float32                       `json:"factor_y" example:"0.48"`
+	Experts        []DTO_Resp_CenterRequestExpert `json:"experts"`
+}
+
+// DTO_Resp_CenterRequestExpert связь эксперта и заявки
 // @Description Информация об эксперте внутри заявки
-type DTO_Resp_OrderExpert struct {
+type DTO_Resp_CenterRequestExpert struct {
 	ID_artcenter uint     `json:"id_artcenter" example:"3"`
-	ID_order     uint     `json:"id_order" example:"5"`
+	ID_request   uint     `json:"id_request" example:"5"`
 	CenterX      *float32 `json:"center_x" example:"123.45"`
 	CenterY      *float32 `json:"center_y" example:"234.56"`
 	Title        string   `json:"title" example:"Центр композиционного анализа №3"`
@@ -99,24 +112,17 @@ type DTO_Resp_OrderExpert struct {
 	Algorithm    string   `json:"algorithm" example:"force_lines"`
 }
 
-// DTO_Resp_OrderExpertLink связь задачи и сервиса
+// DTO_Resp_CenterRequestExpertLink связь задачи и сервиса
 // @Description Информация о связи между задачей и гейтом
-type DTO_Resp_OrderExpertLink struct {
-	OrderID  uint `json:"id_order" example:"1"`
-	ExpertID int  `json:"id_artcenter" example:"3"`
+type DTO_Resp_CenterRequestExpertLink struct {
+	RequestID uint `json:"id_request" example:"1"`
+	ExpertID  int  `json:"id_artcenter" example:"3"`
 }
 
-// DTO_Resp_CurrTaskInfo информация о текущей задаче
-// @Description Статистика по текущей задаче пользователя
-type DTO_Resp_CurrTaskInfo struct {
-	OrderID      uint `json:"order_id" example:"5"`
-	ExpertsCount int  `json:"experts_count" example:"3"`
-}
-
-// DTO_Resp_CurrentDraftOrder информация о текущем черновике
+// DTO_Resp_CurrentDraftCenterRequest информация о текущем черновике
 // @Description Черновая заявка пользователя и количество экспертов
-type DTO_Resp_CurrentDraftOrder struct {
-	OrderID      uint `json:"order_id" example:"5"`
+type DTO_Resp_CurrentDraftCenterRequest struct {
+	RequestID    uint `json:"id_request" example:"5"`
 	ExpertsCount int  `json:"experts_count" example:"2"`
 }
 
@@ -126,26 +132,13 @@ type DTO_Resp_SimpleID struct {
 	ID int `json:"id" example:"1"`
 }
 
-// DTO_Req_OrderUpdate хранит данные для обновления заявки
-type DTO_Req_OrderUpdate struct {
-	Status      *string `json:"status"`
-	ModeratorID *uint   `json:"moderator_id"`
-}
-
-// DTO_Resp_UploadImg результат загрузки изображения эксперта
-// @Description Результат загрузки изображения эксперта
-type DTO_Resp_UploadImg struct {
-	ID    uint   `json:"id" example:"1"`
-	Image string `json:"image" example:"expert_image.png"`
-}
-
-// DTO_Resp_UpdateExpert ответ обновления градусов
+// DTO_Resp_Update ответ обновления градусов
 // @Description Результат обновления углов поворота гейта
-type DTO_Resp_UpdateExpert struct {
-	OrderID  int      `json:"order_id" example:"1"`
-	ExpertID int      `json:"expert_id" example:"2"`
-	CenterX  *float32 `json:"center_x" example:"45.5"`
-	CenterY  *float32 `json:"center_y" example:"45.5"`
+type DTO_Resp_Update struct {
+	RequestID int      `json:"request_id" example:"1"`
+	ExpertID  int      `json:"expert_id" example:"2"`
+	CenterX   *float32 `json:"center_x" example:"45.5"`
+	CenterY   *float32 `json:"center_y" example:"45.5"`
 }
 
 // DTO_User базовая информация о пользователе

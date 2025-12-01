@@ -161,10 +161,10 @@ func (r *Repository) SaveExpertImage(ctx context.Context, id uint, fileHeader *m
 	return finalURL, err
 }
 
-func (r *Repository) AddExpertToDraftOrder(expertID, orderID uint) error {
-	link := model.ExpertsToOrders{
+func (r *Repository) AddExpertToDraftOrder(expertID, requestID uint) error {
+	link := model.ExpertsToRequest{
 		ID_artcenter: expertID,
-		ID_order:     orderID,
+		ID_request:   requestID,
 	}
 	return r.db.Create(&link).Error
 }
