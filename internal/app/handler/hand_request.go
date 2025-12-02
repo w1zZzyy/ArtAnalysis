@@ -228,7 +228,7 @@ func (h *Handler) ApiGetCenterRequestByID(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "ID заявки"
-// @Param request body DTO_Req_CenterRequest true "Данные для обновления"
+// @Param request body DTO_Req_CenterRequestUpd true "Данные для обновления"
 // @Success 200 {object} DTO_Resp_CenterRequest "Обновленная заявка"
 // @Failure 400 {object} string "Invalid input"
 // @Failure 500 {object} string "Internal server error"
@@ -498,7 +498,7 @@ func (h *Handler) ApiRemoveExpertFromCenterRequest(ctx *gin.Context) {
 // @Produce json
 // @Param id path int true "ID заказа"
 // @Param expert_id path int true "ID эксперта"
-// @Param request DTO_Req_CenterRequestUpd true "Новые координаты эксперта"
+// @Param request body DTO_Req_CenterRequestUpd true "Новые координаты эксперта"
 // @Success 200 {object} DTO_Resp_Update "Обновлённые данные эксперта"
 // @Failure 400 {object} string "Invalid input"
 // @Failure 500 {object} string "Internal server error"

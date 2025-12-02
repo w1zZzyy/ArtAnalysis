@@ -260,13 +260,13 @@ func (h *Handler) ApiDeleteExpert(ctx *gin.Context) {
 // @Tags         Experts
 // @Produce      json
 // @Param        id path int true "ID эксперта"
-// @Success      201 {object} DTO_Resp_OrderExpertLink
+// @Success      201 {object} DTO_Resp_CenterRequestExpertLink
 // @Failure      400 {object} map[string]string "Некорректный ID эксперта"
 // @Failure      401 {object} map[string]string "Требуется авторизация"
 // @Failure      500 {object} map[string]string "Ошибка при добавлении эксперта"
-// @Router       /api/draft/experts/{id_expert} [post]
+// @Router       /api/draft/experts/{id} [post]
 func (h *Handler) ApiAddExpertToDraftCenterRequest(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id_expert"))
+	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil || id <= 0 {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
@@ -306,7 +306,7 @@ func (h *Handler) ApiAddExpertToDraftCenterRequest(ctx *gin.Context) {
 // ApiGetCurrCenterRequest godoc
 // @Summary      Получить информацию о текущем черновом заказе
 // @Description  Возвращает ID текущего чернового заказа и количество добавленных экспертов.
-// @Tags         AnalysisOrders
+// @Tags         CenterRequest
 // @Produce      json
 // @Success      200 {object} DTO_Resp_CurrCenterRequestInfo
 // @Failure      401 {object} map[string]string "Требуется авторизация"

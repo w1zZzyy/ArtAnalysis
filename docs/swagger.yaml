@@ -1,5 +1,22 @@
 basePath: /
 definitions:
+  handler.DTO_Req_CenterRequestUpd:
+    description: Обновление полей заявки (например, статус или результаты)
+    properties:
+      center_x:
+        example: 123.45
+        type: number
+      center_y:
+        example: 234.56
+        type: number
+      request_description:
+        example: Calculate center
+        type: string
+    required:
+    - center_x
+    - center_y
+    - request_description
+    type: object
   handler.DTO_Req_ExpertCreate:
     description: Данные для добавления нового эксперта
     properties:
@@ -26,13 +43,6 @@ definitions:
     - name
     - title
     type: object
-  handler.DTO_Req_OrderUpdate:
-    properties:
-      moderator_id:
-        type: integer
-      status:
-        type: string
-    type: object
   handler.DTO_Req_UserReg:
     description: Данные для регистрации нового пользователя
     properties:
@@ -53,13 +63,88 @@ definitions:
         example: new_secure_password
         type: string
     type: object
-  handler.DTO_Resp_CurrTaskInfo:
+  handler.DTO_Resp_CenterRequest:
+    description: Полная информация о заявке с экспертами
+    properties:
+      date_conclusion:
+        example: "2025-11-07T12:00:00Z"
+        type: string
+      date_created:
+        example: "2025-11-05T12:00:00Z"
+        type: string
+      date_formed:
+        example: "2025-11-06T12:00:00Z"
+        type: string
+      description:
+        example: Art state calculation
+        type: string
+      experts:
+        items:
+          $ref: '#/definitions/handler.DTO_Resp_CenterRequestExpert'
+        type: array
+      factor_x:
+        example: 0.51
+        type: number
+      factor_y:
+        example: 0.48
+        type: number
+      id_request:
+        example: 5
+        type: integer
+      id_user:
+        example: 1
+        type: integer
+      request_status:
+        enum:
+        - draft
+        - formed
+        - completed
+        - rejected
+        example: formed
+        type: string
+    type: object
+  handler.DTO_Resp_CenterRequestExpert:
+    description: Информация об эксперте внутри заявки
+    properties:
+      algorithm:
+        example: force_lines
+        type: string
+      center_x:
+        example: 123.45
+        type: number
+      center_y:
+        example: 234.56
+        type: number
+      id_artcenter:
+        example: 3
+        type: integer
+      id_request:
+        example: 5
+        type: integer
+      name:
+        example: Сидоров П.П.
+        type: string
+      title:
+        example: Центр композиционного анализа №3
+        type: string
+    type: object
+  handler.DTO_Resp_CenterRequestExpertLink:
+    description: Информация о связи между задачей и эксперта
+    properties:
+      id_artcenter:
+        example: 3
+        type: integer
+      id_request:
+        example: 1
+        type: integer
+    type: object
+  handler.DTO_Resp_CurrCenterRequestInfo:
     description: Статистика по текущей задаче пользователя
     properties:
       experts_count:
         example: 3
         type: integer
-      order_id:
+      id_request:
         example: 5
         type: integer
     type: object
@@ -88,81 +173,6 @@ definitions:
         example: Центр анализа №1
         type: string
     type: object
-  handler.DTO_Resp_Order:
-    description: Полная информация о заявке с экспертами
-    properties:
-      date_completed:
-        example: "2025-11-07T12:00:00Z"
-        type: string
-      date_created:
-        example: "2025-11-05T12:00:00Z"
-        type: string
-      date_formed:
-        example: "2025-11-06T12:00:00Z"
-        type: string
-      experts:
-        items:
-          $ref: '#/definitions/handler.DTO_Resp_OrderExpert'
-        type: array
-      id_creator:
-        example: 1
-        type: integer
-      id_moderator:
-        example: 2
-        type: integer
-      id_order:
-        example: 5
-        type: integer
-      order_status:
-        enum:
-        - draft
-        - formed
-        - completed
-        - rejected
-        example: formed
-        type: string
-      result_x:
-        example: 0.51
-        type: number
-      result_y:
-        example: 0.48
-        type: number
-    type: object
-  handler.DTO_Resp_OrderExpert:
-    description: Информация об эксперте внутри заявки
-    properties:
-      algorithm:
-        example: force_lines
-        type: string
-      center_x:
-        example: 123.45
-        type: number
-      center_y:
-        example: 234.56
-        type: number
-      id_artcenter:
-        example: 3
-        type: integer
-      id_order:
-        example: 5
-        type: integer
-      name:
-        example: Сидоров П.П.
-        type: string
-      title:
-        example: Центр композиционного анализа №3
-        type: string
-    type: object
-  handler.DTO_Resp_OrderExpertLink:
-    description: Информация о связи между задачей и гейтом
-    properties:
-      id_artcenter:
-        example: 3
-        type: integer
-      id_order:
-        example: 1
-        type: integer
-    type: object
   handler.DTO_Resp_SimpleID:
     description: Ответ, содержащий только идентификатор
     properties:
@@ -179,8 +189,8 @@ definitions:
       user:
         $ref: '#/definitions/handler.DTO_User'
     type: object
-  handler.DTO_Resp_UpdateExpert:
-    description: Результат обновления углов поворота гейта
+  handler.DTO_Resp_Update:
+    description: Результат обновления центра
     properties:
       center_x:
         example: 45.5
@@ -191,12 +201,12 @@ definitions:
       expert_id:
         example: 2
         type: integer
-      order_id:
+      request_id:
         example: 1
         type: integer
     type: object
   handler.DTO_Resp_UploadImg:
-    description: Результат загрузки изображения эксперта
+    description: Результат загрузки изображения для эксперта
     properties:
       id:
         example: 1
@@ -225,42 +235,6 @@ definitions:
         example: art_researcher
         type: string
     type: object
-  handler.updateExpertRequest:
-    properties:
-      center_x:
-        type: number
-      center_y:
-        type: number
-    type: object
-  model.AnalysisOrder:
-    properties:
-      dateCompleted:
-        type: string
-      dateCreated:
-        type: string
-      dateFormed:
-        type: string
-      expertsLinks:
-        items:
-          $ref: '#/definitions/model.ExpertsToOrders'
-        type: array
-      id_creator:
-        type: integer
-      id_moderator:
-        type: integer
-      id_order:
-        type: integer
-      moderator:
-        $ref: '#/definitions/model.Users'
-      orderStatus:
-        type: string
-      resultX:
-        type: number
-      resultY:
-        type: number
-      user:
-        $ref: '#/definitions/model.Users'
-    type: object
   model.ArtExpert:
     properties:
       algorithm:
@@ -275,19 +249,50 @@ definitions:
         type: string
       orders:
         items:
-          $ref: '#/definitions/model.ExpertsToOrders'
+          $ref: '#/definitions/model.ExpertsToRequest'
         type: array
       status:
         type: boolean
       title:
         type: string
     type: object
-  model.ExpertsToOrders:
+  model.CenterRequest:
     properties:
-      analysisOrder:
-        $ref: '#/definitions/model.AnalysisOrder'
+      dateConclusion:
+        type: string
+      dateCreated:
+        type: string
+      dateFormed:
+        type: string
+      expertsLinks:
+        items:
+          $ref: '#/definitions/model.ExpertsToRequest'
+        type: array
+      factorX:
+        type: number
+      factorY:
+        type: number
+      id_creator:
+        type: integer
+      id_moderator:
+        type: integer
+      id_request:
+        type: integer
+      moderator:
+        $ref: '#/definitions/model.Users'
+      requestDescription:
+        type: string
+      requestStatus:
+        type: string
+      user:
+        $ref: '#/definitions/model.Users'
+    type: object
+  model.ExpertsToRequest:
+    properties:
       artExpert:
         $ref: '#/definitions/model.ArtExpert'
+      centerRequest:
+        $ref: '#/definitions/model.CenterRequest'
       centerX:
         format: float32
         type: number
@@ -296,7 +301,7 @@ definitions:
         type: number
       id_artcenter:
         type: integer
-      id_order:
+      id_request:
         type: integer
     type: object
   model.Users:
@@ -324,237 +329,6 @@ info:
   title: Art Analysis API
   version: "1.0"
 paths:
-  /api/analysis_order/current:
-    get:
-      description: Возвращает ID текущего чернового заказа и количество добавленных
-        экспертов.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/handler.DTO_Resp_CurrTaskInfo'
-        "401":
-          description: Требуется авторизация
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Ошибка при получении данных
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Получить информацию о текущем черновом заказе
-      tags:
-      - AnalysisOrders
-  /api/analysis_orders:
-    get:
-      consumes:
-      - application/json
-      description: Возвращает список заявок. Пользователь видит только свои заявки,
-        модератор — все заявки. Неавторизованный пользователь получает ошибку доступа.
-      parameters:
-      - description: Фильтр по статусу
-        in: query
-        name: status
-        type: string
-      - description: Начальная дата (фильтр от)
-        in: query
-        name: from
-        type: string
-      - description: Конечная дата (фильтр до)
-        in: query
-        name: to
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Список заявок
-          schema:
-            items:
-              $ref: '#/definitions/handler.DTO_Resp_Order'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "403":
-          description: Forbidden
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Получить список заявок на анализ
-      tags:
-      - AnalysisOrders
-  /api/analysis_orders/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Полностью удаляет заказ анализа произведения искусства
-      parameters:
-      - description: ID заказа
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ID удалённого заказа
-          schema:
-            $ref: '#/definitions/handler.DTO_Resp_SimpleID'
-        "400":
-          description: Invalid order ID
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Удалить заказ на анализ
-      tags:
-      - AnalysisOrders
-    get:
-      consumes:
-      - application/json
-      description: Возвращает детальную информацию о заявке на анализ по её идентификатору
-      parameters:
-      - description: ID заявки
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Детали заявки
-          schema:
-            $ref: '#/definitions/handler.DTO_Resp_Order'
-        "400":
-          description: Invalid order ID
-          schema:
-            type: string
-        "404":
-          description: Order not found
-          schema:
-            type: string
-      summary: Получить заявку по ID
-      tags:
-      - AnalysisOrders
-    put:
-      consumes:
-      - application/json
-      description: Обновляет статус заявки и/или модератора, если это требуется
-      parameters:
-      - description: ID заявки
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Данные для обновления
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/handler.DTO_Req_OrderUpdate'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Обновленная заявка
-          schema:
-            $ref: '#/definitions/handler.DTO_Resp_Order'
-        "400":
-          description: Invalid input
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Обновить заявку
-      tags:
-      - AnalysisOrders
-  /api/analysis_orders/{id}/form:
-    put:
-      consumes:
-      - application/json
-      description: Переводит заявку из статуса черновика в статус сформированной
-      parameters:
-      - description: ID заявки
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Сформированная заявка
-          schema:
-            $ref: '#/definitions/handler.DTO_Resp_Order'
-        "400":
-          description: Invalid order ID or cannot form order
-          schema:
-            type: string
-      summary: Сформировать заявку
-      tags:
-      - AnalysisOrders
-  /api/analysis_orders/{id}/resolve:
-    put:
-      consumes:
-      - application/json
-      description: Выполняет завершение или отклонение заявки по анализу произведения
-        искусства. При завершении рассчитывается финальный композиционный центр.
-      parameters:
-      - description: ID заявки
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 'Действие с заявкой (action: complete | reject)'
-        in: body
-        name: request
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Обновлённая заявка
-          schema:
-            $ref: '#/definitions/handler.DTO_Resp_Order'
-        "400":
-          description: Invalid input or missing required fields
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "404":
-          description: Order not found
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Завершить/отклонить заявку
-      tags:
-      - AnalysisOrders
   /api/auth/logout:
     post:
       consumes:
@@ -581,6 +355,286 @@ paths:
       summary: Выход из системы
       tags:
       - Users
+  /api/center_request:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список заявок. Пользователь видит только свои заявки,
+        модератор — все заявки. Неавторизованный пользователь получает ошибку доступа.
+      parameters:
+      - description: Фильтр по статусу
+        in: query
+        name: status
+        type: string
+      - description: Начальная дата (фильтр от)
+        in: query
+        name: from
+        type: string
+      - description: Конечная дата (фильтр до)
+        in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список заявок
+          schema:
+            items:
+              $ref: '#/definitions/handler.DTO_Resp_CenterRequest'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Получить список заявок на анализ
+      tags:
+      - CenterRequest
+  /api/center_request/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Полностью удаляет заказ анализа произведения искусства
+      parameters:
+      - description: ID заказа
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ID удалённого заказа
+          schema:
+            $ref: '#/definitions/handler.DTO_Resp_SimpleID'
+        "400":
+          description: Invalid request ID
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Удалить заказ на анализ
+      tags:
+      - CenterRequest
+    put:
+      consumes:
+      - application/json
+      description: Обновляет статус заявки и/или модератора, если это требуется
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.DTO_Req_CenterRequestUpd'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленная заявка
+          schema:
+            $ref: '#/definitions/handler.DTO_Resp_CenterRequest'
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Обновить заявку
+      tags:
+      - CenterRequest
+  /api/center_request/{id}/experts/{expert_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет связь между экспертом и заказом анализа
+      parameters:
+      - description: ID заказа
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID эксперта
+        in: path
+        name: expert_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация об удалённой связи
+          schema:
+            $ref: '#/definitions/handler.DTO_Resp_CenterRequestExpertLink'
+        "400":
+          description: Invalid IDs
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Удалить эксперта из заказа
+      tags:
+      - M-M
+    put:
+      consumes:
+      - application/json
+      description: Обновляет координаты центра, переданные экспертом, в рамках заказа
+        анализа
+      parameters:
+      - description: ID заказа
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID эксперта
+        in: path
+        name: expert_id
+        required: true
+        type: integer
+      - description: Новые координаты эксперта
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.DTO_Req_CenterRequestUpd'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновлённые данные эксперта
+          schema:
+            $ref: '#/definitions/handler.DTO_Resp_Update'
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Обновить параметры эксперта
+      tags:
+      - M-M
+  /api/center_request/{id}/form:
+    put:
+      consumes:
+      - application/json
+      description: Переводит заявку из статуса черновика в статус сформированной
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Сформированная заявка
+          schema:
+            $ref: '#/definitions/handler.DTO_Resp_CenterRequest'
+        "400":
+          description: Invalid request ID or cannot form request
+          schema:
+            type: string
+      summary: Сформировать заявку
+      tags:
+      - CenterRequest
+  /api/center_request/{id}/resolve:
+    put:
+      consumes:
+      - application/json
+      description: Выполняет завершение или отклонение заявки по анализу произведения
+        искусства. При завершении рассчитывается финальный композиционный центр.
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 'Действие с заявкой (action: complete | reject)'
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновлённая заявка
+          schema:
+            $ref: '#/definitions/handler.DTO_Resp_CenterRequest'
+        "400":
+          description: Invalid input or missing required fields
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Request not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Завершить/отклонить заявку
+      tags:
+      - CenterRequest
+  /api/center_request/current:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает детальную информацию о заявке на анализ по её идентификатору
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Детали заявки
+          schema:
+            $ref: '#/definitions/handler.DTO_Resp_CenterRequest'
+        "400":
+          description: Invalid request ID
+          schema:
+            type: string
+        "404":
+          description: request not found
+          schema:
+            type: string
+      summary: Получить заявку по ID
+      tags:
+      - CenterRequest
   /api/draft/experts/{id}:
     post:
       description: Добавляет указанного эксперта в текущий черновой заказ пользователя.
@@ -596,7 +650,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/handler.DTO_Resp_OrderExpertLink'
+            $ref: '#/definitions/handler.DTO_Resp_CenterRequestExpertLink'
         "400":
           description: Некорректный ID эксперта
           schema:
@@ -820,80 +874,6 @@ paths:
       summary: Загрузить изображение эксперта
       tags:
       - Experts
-  /api/orders/{order_id}/experts/{expert_id}:
-    delete:
-      consumes:
-      - application/json
-      description: Удаляет связь между экспертом и заказом анализа
-      parameters:
-      - description: ID заказа
-        in: path
-        name: order_id
-        required: true
-        type: integer
-      - description: ID эксперта
-        in: path
-        name: expert_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Информация об удалённой связи
-          schema:
-            $ref: '#/definitions/handler.DTO_Resp_OrderExpertLink'
-        "400":
-          description: Invalid IDs
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Удалить эксперта из заказа
-      tags:
-      - M-M
-    put:
-      consumes:
-      - application/json
-      description: Обновляет координаты центра, переданные экспертом, в рамках заказа
-        анализа
-      parameters:
-      - description: ID заказа
-        in: path
-        name: order_id
-        required: true
-        type: integer
-      - description: ID эксперта
-        in: path
-        name: expert_id
-        required: true
-        type: integer
-      - description: Новые координаты эксперта
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/handler.updateExpertRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Обновлённые данные эксперта
-          schema:
-            $ref: '#/definitions/handler.DTO_Resp_UpdateExpert'
-        "400":
-          description: Invalid input
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Обновить параметры эксперта
-      tags:
-      - M-M
   /api/users/me:
     get:
       consumes:

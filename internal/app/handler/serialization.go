@@ -72,10 +72,10 @@ type DTO_Resp_Expert struct {
 }
 
 // DTO_Resp_UploadImg ответ загрузки изображения
-// @Description Результат загрузки изображения для гейта
+// @Description Результат загрузки изображения для эксперта
 type DTO_Resp_UploadImg struct {
 	ID    int    `json:"id" example:"1"`
-	Image string `json:"image" example:"gate_image.png"`
+	Image string `json:"image" example:"expert_image.png"`
 }
 
 // DTO_Resp_CurrCenterRequestInfo информация о текущей задаче
@@ -113,7 +113,7 @@ type DTO_Resp_CenterRequestExpert struct {
 }
 
 // DTO_Resp_CenterRequestExpertLink связь задачи и сервиса
-// @Description Информация о связи между задачей и гейтом
+// @Description Информация о связи между задачей и эксперта
 type DTO_Resp_CenterRequestExpertLink struct {
 	RequestID uint `json:"id_request" example:"1"`
 	ExpertID  int  `json:"id_artcenter" example:"3"`
@@ -132,8 +132,8 @@ type DTO_Resp_SimpleID struct {
 	ID int `json:"id" example:"1"`
 }
 
-// DTO_Resp_Update ответ обновления градусов
-// @Description Результат обновления углов поворота гейта
+// DTO_Resp_Update ответ обновления центра
+// @Description Результат обновления центра
 type DTO_Resp_Update struct {
 	RequestID int      `json:"request_id" example:"1"`
 	ExpertID  int      `json:"expert_id" example:"2"`

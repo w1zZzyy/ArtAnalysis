@@ -24,353 +24,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/analysis_order/current": {
-            "get": {
-                "description": "Возвращает ID текущего чернового заказа и количество добавленных экспертов.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "AnalysisOrders"
-                ],
-                "summary": "Получить информацию о текущем черновом заказе",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/handler.DTO_Resp_CurrTaskInfo"
-                        }
-                    },
-                    "401": {
-                        "description": "Требуется авторизация",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка при получении данных",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/analysis_orders": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Возвращает список заявок. Пользователь видит только свои заявки, модератор — все заявки. Неавторизованный пользователь получает ошибку доступа.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "AnalysisOrders"
-                ],
-                "summary": "Получить список заявок на анализ",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Фильтр по статусу",
-                        "name": "status",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Начальная дата (фильтр от)",
-                        "name": "from",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Конечная дата (фильтр до)",
-                        "name": "to",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Список заявок",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/handler.DTO_Resp_Order"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/analysis_orders/{id}": {
-            "get": {
-                "description": "Возвращает детальную информацию о заявке на анализ по её идентификатору",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "AnalysisOrders"
-                ],
-                "summary": "Получить заявку по ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID заявки",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Детали заявки",
-                        "schema": {
-                            "$ref": "#/definitions/handler.DTO_Resp_Order"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid order ID",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Order not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Обновляет статус заявки и/или модератора, если это требуется",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "AnalysisOrders"
-                ],
-                "summary": "Обновить заявку",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID заявки",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Данные для обновления",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.DTO_Req_OrderUpdate"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Обновленная заявка",
-                        "schema": {
-                            "$ref": "#/definitions/handler.DTO_Resp_Order"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid input",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Полностью удаляет заказ анализа произведения искусства",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "AnalysisOrders"
-                ],
-                "summary": "Удалить заказ на анализ",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID заказа",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "ID удалённого заказа",
-                        "schema": {
-                            "$ref": "#/definitions/handler.DTO_Resp_SimpleID"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid order ID",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/analysis_orders/{id}/form": {
-            "put": {
-                "description": "Переводит заявку из статуса черновика в статус сформированной",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "AnalysisOrders"
-                ],
-                "summary": "Сформировать заявку",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID заявки",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Сформированная заявка",
-                        "schema": {
-                            "$ref": "#/definitions/handler.DTO_Resp_Order"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid order ID or cannot form order",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/analysis_orders/{id}/resolve": {
-            "put": {
-                "description": "Выполняет завершение или отклонение заявки по анализу произведения искусства. При завершении рассчитывается финальный композиционный центр.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "AnalysisOrders"
-                ],
-                "summary": "Завершить/отклонить заявку",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID заявки",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Действие с заявкой (action: complete | reject)",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Обновлённая заявка",
-                        "schema": {
-                            "$ref": "#/definitions/handler.DTO_Resp_Order"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid input or missing required fields",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Order not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/api/auth/logout": {
             "post": {
                 "security": [
@@ -411,6 +64,426 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/center_request": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список заявок. Пользователь видит только свои заявки, модератор — все заявки. Неавторизованный пользователь получает ошибку доступа.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CenterRequest"
+                ],
+                "summary": "Получить список заявок на анализ",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Фильтр по статусу",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Начальная дата (фильтр от)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Конечная дата (фильтр до)",
+                        "name": "to",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список заявок",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/handler.DTO_Resp_CenterRequest"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/center_request/current": {
+            "get": {
+                "description": "Возвращает детальную информацию о заявке на анализ по её идентификатору",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CenterRequest"
+                ],
+                "summary": "Получить заявку по ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID заявки",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Детали заявки",
+                        "schema": {
+                            "$ref": "#/definitions/handler.DTO_Resp_CenterRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "request not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/center_request/{id}": {
+            "put": {
+                "description": "Обновляет статус заявки и/или модератора, если это требуется",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CenterRequest"
+                ],
+                "summary": "Обновить заявку",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID заявки",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные для обновления",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.DTO_Req_CenterRequestUpd"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Обновленная заявка",
+                        "schema": {
+                            "$ref": "#/definitions/handler.DTO_Resp_CenterRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Полностью удаляет заказ анализа произведения искусства",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CenterRequest"
+                ],
+                "summary": "Удалить заказ на анализ",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID заказа",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ID удалённого заказа",
+                        "schema": {
+                            "$ref": "#/definitions/handler.DTO_Resp_SimpleID"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/center_request/{id}/experts/{expert_id}": {
+            "put": {
+                "description": "Обновляет координаты центра, переданные экспертом, в рамках заказа анализа",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "M-M"
+                ],
+                "summary": "Обновить параметры эксперта",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID заказа",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID эксперта",
+                        "name": "expert_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Новые координаты эксперта",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.DTO_Req_CenterRequestUpd"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Обновлённые данные эксперта",
+                        "schema": {
+                            "$ref": "#/definitions/handler.DTO_Resp_Update"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удаляет связь между экспертом и заказом анализа",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "M-M"
+                ],
+                "summary": "Удалить эксперта из заказа",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID заказа",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID эксперта",
+                        "name": "expert_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Информация об удалённой связи",
+                        "schema": {
+                            "$ref": "#/definitions/handler.DTO_Resp_CenterRequestExpertLink"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid IDs",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/center_request/{id}/form": {
+            "put": {
+                "description": "Переводит заявку из статуса черновика в статус сформированной",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CenterRequest"
+                ],
+                "summary": "Сформировать заявку",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID заявки",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Сформированная заявка",
+                        "schema": {
+                            "$ref": "#/definitions/handler.DTO_Resp_CenterRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request ID or cannot form request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/center_request/{id}/resolve": {
+            "put": {
+                "description": "Выполняет завершение или отклонение заявки по анализу произведения искусства. При завершении рассчитывается финальный композиционный центр.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CenterRequest"
+                ],
+                "summary": "Завершить/отклонить заявку",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID заявки",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Действие с заявкой (action: complete | reject)",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Обновлённая заявка",
+                        "schema": {
+                            "$ref": "#/definitions/handler.DTO_Resp_CenterRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input or missing required fields",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Request not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/draft/experts/{id}": {
             "post": {
                 "description": "Добавляет указанного эксперта в текущий черновой заказ пользователя.",
@@ -434,7 +507,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/handler.DTO_Resp_OrderExpertLink"
+                            "$ref": "#/definitions/handler.DTO_Resp_CenterRequestExpertLink"
                         }
                     },
                     "400": {
@@ -772,115 +845,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/orders/{order_id}/experts/{expert_id}": {
-            "put": {
-                "description": "Обновляет координаты центра, переданные экспертом, в рамках заказа анализа",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "M-M"
-                ],
-                "summary": "Обновить параметры эксперта",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID заказа",
-                        "name": "order_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "ID эксперта",
-                        "name": "expert_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Новые координаты эксперта",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.updateExpertRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Обновлённые данные эксперта",
-                        "schema": {
-                            "$ref": "#/definitions/handler.DTO_Resp_UpdateExpert"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid input",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Удаляет связь между экспертом и заказом анализа",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "M-M"
-                ],
-                "summary": "Удалить эксперта из заказа",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID заказа",
-                        "name": "order_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "ID эксперта",
-                        "name": "expert_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Информация об удалённой связи",
-                        "schema": {
-                            "$ref": "#/definitions/handler.DTO_Resp_OrderExpertLink"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid IDs",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/api/users/me": {
             "get": {
                 "security": [
@@ -1076,6 +1040,29 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handler.DTO_Req_CenterRequestUpd": {
+            "description": "Обновление полей заявки (например, статус или результаты)",
+            "type": "object",
+            "required": [
+                "center_x",
+                "center_y",
+                "request_description"
+            ],
+            "properties": {
+                "center_x": {
+                    "type": "number",
+                    "example": 123.45
+                },
+                "center_y": {
+                    "type": "number",
+                    "example": 234.56
+                },
+                "request_description": {
+                    "type": "string",
+                    "example": "Calculate center"
+                }
+            }
+        },
         "handler.DTO_Req_ExpertCreate": {
             "description": "Данные для добавления нового эксперта",
             "type": "object",
@@ -1111,17 +1098,6 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.DTO_Req_OrderUpdate": {
-            "type": "object",
-            "properties": {
-                "moderator_id": {
-                    "type": "integer"
-                },
-                "status": {
-                    "type": "string"
-                }
-            }
-        },
         "handler.DTO_Req_UserReg": {
             "description": "Данные для регистрации нового пользователя",
             "type": "object",
@@ -1150,7 +1126,109 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.DTO_Resp_CurrTaskInfo": {
+        "handler.DTO_Resp_CenterRequest": {
+            "description": "Полная информация о заявке с экспертами",
+            "type": "object",
+            "properties": {
+                "date_conclusion": {
+                    "type": "string",
+                    "example": "2025-11-07T12:00:00Z"
+                },
+                "date_created": {
+                    "type": "string",
+                    "example": "2025-11-05T12:00:00Z"
+                },
+                "date_formed": {
+                    "type": "string",
+                    "example": "2025-11-06T12:00:00Z"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Art state calculation"
+                },
+                "experts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.DTO_Resp_CenterRequestExpert"
+                    }
+                },
+                "factor_x": {
+                    "type": "number",
+                    "example": 0.51
+                },
+                "factor_y": {
+                    "type": "number",
+                    "example": 0.48
+                },
+                "id_request": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "id_user": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "request_status": {
+                    "type": "string",
+                    "enum": [
+                        "draft",
+                        "formed",
+                        "completed",
+                        "rejected"
+                    ],
+                    "example": "formed"
+                }
+            }
+        },
+        "handler.DTO_Resp_CenterRequestExpert": {
+            "description": "Информация об эксперте внутри заявки",
+            "type": "object",
+            "properties": {
+                "algorithm": {
+                    "type": "string",
+                    "example": "force_lines"
+                },
+                "center_x": {
+                    "type": "number",
+                    "example": 123.45
+                },
+                "center_y": {
+                    "type": "number",
+                    "example": 234.56
+                },
+                "id_artcenter": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "id_request": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Сидоров П.П."
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Центр композиционного анализа №3"
+                }
+            }
+        },
+        "handler.DTO_Resp_CenterRequestExpertLink": {
+            "description": "Информация о связи между задачей и эксперта",
+            "type": "object",
+            "properties": {
+                "id_artcenter": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "id_request": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "handler.DTO_Resp_CurrCenterRequestInfo": {
             "description": "Статистика по текущей задаче пользователя",
             "type": "object",
             "properties": {
@@ -1158,7 +1236,7 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 3
                 },
-                "order_id": {
+                "id_request": {
                     "type": "integer",
                     "example": 5
                 }
@@ -1198,108 +1276,6 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.DTO_Resp_Order": {
-            "description": "Полная информация о заявке с экспертами",
-            "type": "object",
-            "properties": {
-                "date_completed": {
-                    "type": "string",
-                    "example": "2025-11-07T12:00:00Z"
-                },
-                "date_created": {
-                    "type": "string",
-                    "example": "2025-11-05T12:00:00Z"
-                },
-                "date_formed": {
-                    "type": "string",
-                    "example": "2025-11-06T12:00:00Z"
-                },
-                "experts": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handler.DTO_Resp_OrderExpert"
-                    }
-                },
-                "id_creator": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "id_moderator": {
-                    "type": "integer",
-                    "example": 2
-                },
-                "id_order": {
-                    "type": "integer",
-                    "example": 5
-                },
-                "order_status": {
-                    "type": "string",
-                    "enum": [
-                        "draft",
-                        "formed",
-                        "completed",
-                        "rejected"
-                    ],
-                    "example": "formed"
-                },
-                "result_x": {
-                    "type": "number",
-                    "example": 0.51
-                },
-                "result_y": {
-                    "type": "number",
-                    "example": 0.48
-                }
-            }
-        },
-        "handler.DTO_Resp_OrderExpert": {
-            "description": "Информация об эксперте внутри заявки",
-            "type": "object",
-            "properties": {
-                "algorithm": {
-                    "type": "string",
-                    "example": "force_lines"
-                },
-                "center_x": {
-                    "type": "number",
-                    "example": 123.45
-                },
-                "center_y": {
-                    "type": "number",
-                    "example": 234.56
-                },
-                "id_artcenter": {
-                    "type": "integer",
-                    "example": 3
-                },
-                "id_order": {
-                    "type": "integer",
-                    "example": 5
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Сидоров П.П."
-                },
-                "title": {
-                    "type": "string",
-                    "example": "Центр композиционного анализа №3"
-                }
-            }
-        },
-        "handler.DTO_Resp_OrderExpertLink": {
-            "description": "Информация о связи между задачей и гейтом",
-            "type": "object",
-            "properties": {
-                "id_artcenter": {
-                    "type": "integer",
-                    "example": 3
-                },
-                "id_order": {
-                    "type": "integer",
-                    "example": 1
-                }
-            }
-        },
         "handler.DTO_Resp_SimpleID": {
             "description": "Ответ, содержащий только идентификатор",
             "type": "object",
@@ -1323,8 +1299,8 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.DTO_Resp_UpdateExpert": {
-            "description": "Результат обновления углов поворота гейта",
+        "handler.DTO_Resp_Update": {
+            "description": "Результат обновления центра",
             "type": "object",
             "properties": {
                 "center_x": {
@@ -1339,14 +1315,14 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 2
                 },
-                "order_id": {
+                "request_id": {
                     "type": "integer",
                     "example": 1
                 }
             }
         },
         "handler.DTO_Resp_UploadImg": {
-            "description": "Результат загрузки изображения эксперта",
+            "description": "Результат загрузки изображения для эксперта",
             "type": "object",
             "properties": {
                 "id": {
@@ -1387,61 +1363,6 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.updateExpertRequest": {
-            "type": "object",
-            "properties": {
-                "center_x": {
-                    "type": "number"
-                },
-                "center_y": {
-                    "type": "number"
-                }
-            }
-        },
-        "model.AnalysisOrder": {
-            "type": "object",
-            "properties": {
-                "dateCompleted": {
-                    "type": "string"
-                },
-                "dateCreated": {
-                    "type": "string"
-                },
-                "dateFormed": {
-                    "type": "string"
-                },
-                "expertsLinks": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.ExpertsToOrders"
-                    }
-                },
-                "id_creator": {
-                    "type": "integer"
-                },
-                "id_moderator": {
-                    "type": "integer"
-                },
-                "id_order": {
-                    "type": "integer"
-                },
-                "moderator": {
-                    "$ref": "#/definitions/model.Users"
-                },
-                "orderStatus": {
-                    "type": "string"
-                },
-                "resultX": {
-                    "type": "number"
-                },
-                "resultY": {
-                    "type": "number"
-                },
-                "user": {
-                    "$ref": "#/definitions/model.Users"
-                }
-            }
-        },
         "model.ArtExpert": {
             "type": "object",
             "properties": {
@@ -1463,7 +1384,7 @@ const docTemplate = `{
                 "orders": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.ExpertsToOrders"
+                        "$ref": "#/definitions/model.ExpertsToRequest"
                     }
                 },
                 "status": {
@@ -1474,14 +1395,61 @@ const docTemplate = `{
                 }
             }
         },
-        "model.ExpertsToOrders": {
+        "model.CenterRequest": {
             "type": "object",
             "properties": {
-                "analysisOrder": {
-                    "$ref": "#/definitions/model.AnalysisOrder"
+                "dateConclusion": {
+                    "type": "string"
                 },
+                "dateCreated": {
+                    "type": "string"
+                },
+                "dateFormed": {
+                    "type": "string"
+                },
+                "expertsLinks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.ExpertsToRequest"
+                    }
+                },
+                "factorX": {
+                    "type": "number"
+                },
+                "factorY": {
+                    "type": "number"
+                },
+                "id_creator": {
+                    "type": "integer"
+                },
+                "id_moderator": {
+                    "type": "integer"
+                },
+                "id_request": {
+                    "type": "integer"
+                },
+                "moderator": {
+                    "$ref": "#/definitions/model.Users"
+                },
+                "requestDescription": {
+                    "type": "string"
+                },
+                "requestStatus": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/model.Users"
+                }
+            }
+        },
+        "model.ExpertsToRequest": {
+            "type": "object",
+            "properties": {
                 "artExpert": {
                     "$ref": "#/definitions/model.ArtExpert"
+                },
+                "centerRequest": {
+                    "$ref": "#/definitions/model.CenterRequest"
                 },
                 "centerX": {
                     "type": "number",
@@ -1494,7 +1462,7 @@ const docTemplate = `{
                 "id_artcenter": {
                     "type": "integer"
                 },
-                "id_order": {
+                "id_request": {
                     "type": "integer"
                 }
             }
