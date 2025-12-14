@@ -76,7 +76,7 @@ services:
 
 
   postgres:
-    image: postgres:latest
+    image: postgres:16
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
