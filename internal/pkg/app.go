@@ -2,12 +2,15 @@ package pkg
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/w1zZzyy22/art-analysis/internal/app/config"
 	"github.com/w1zZzyy22/art-analysis/internal/app/handler"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+
+	"github.com/gin-contrib/cors"
 )
 
 type Application struct {
@@ -26,6 +29,15 @@ func NewApp(c *config.Config, r *gin.Engine, h *handler.Handler) *Application {
 
 func (a *Application) RunApp() {
 	logrus.Info("Server start up")
+
+	a.Router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"}, // фронтенд
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	a.Handler.RegisterHandler(a.Router)
 	a.Handler.RegisterStatic(a.Router)
