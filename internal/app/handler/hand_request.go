@@ -182,11 +182,12 @@ func (h *Handler) ApiListCenterRequest(ctx *gin.Context) {
 // @Success 200 {object} DTO_Resp_CenterRequest "Детали заявки"
 // @Failure 400 {object} string "Invalid request ID"
 // @Failure 404 {object} string "request not found"
-// @Router /api/center_request/current [get]
+// @Router /api/center_request/{id} [get]
 func (h *Handler) ApiGetCenterRequestByID(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil || id <= 0 {
-		h.errorHandler(ctx, http.StatusBadRequest, err)
+		h.errorHandler(ctx, http.StatusBadRequest, errors.New("invalid request id"))
 		return
 	}
 
@@ -196,10 +197,9 @@ func (h *Handler) ApiGetCenterRequestByID(ctx *gin.Context) {
 		return
 	}
 
-	var represent_req DTO_Resp_CenterRequest
-	var dtoCenterRequestExpert []DTO_Resp_CenterRequestExpert
+	experts := make([]DTO_Resp_CenterRequestExpert, 0, len(req.ExpertsLinks))
 	for _, expert := range req.ExpertsLinks {
-		dtoCenterRequestExpert = append(dtoCenterRequestExpert, DTO_Resp_CenterRequestExpert{
+		experts = append(experts, DTO_Resp_CenterRequestExpert{
 			ID_artcenter: expert.ID_artcenter,
 			ID_request:   expert.ID_request,
 			CenterX:      expert.CenterX,
@@ -207,7 +207,7 @@ func (h *Handler) ApiGetCenterRequestByID(ctx *gin.Context) {
 		})
 	}
 
-	represent_req = DTO_Resp_CenterRequest{
+	ctx.JSON(http.StatusOK, DTO_Resp_CenterRequest{
 		ID_request:     req.ID_request,
 		RequestStatus:  req.RequestStatus,
 		DateCreated:    req.DateCreated,
@@ -215,10 +215,8 @@ func (h *Handler) ApiGetCenterRequestByID(ctx *gin.Context) {
 		DateConclusion: req.DateConclusion,
 		FactorX:        req.FactorX,
 		FactorY:        req.FactorY,
-		Experts:        dtoCenterRequestExpert,
-	}
-
-	ctx.JSON(http.StatusOK, represent_req)
+		Experts:        experts,
+	})
 }
 
 // ApiUpdateCenterRequest обновляет данные заявки

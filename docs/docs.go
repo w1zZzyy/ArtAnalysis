@@ -135,6 +135,44 @@ const docTemplate = `{
         },
         "/api/center_request/current": {
             "get": {
+                "description": "Возвращает ID текущего чернового заказа и количество добавленных экспертов.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CenterRequest"
+                ],
+                "summary": "Получить информацию о текущем черновом заказе",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.DTO_Resp_CurrCenterRequestInfo"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка при получении данных",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/center_request/{id}": {
+            "get": {
                 "description": "Возвращает детальную информацию о заявке на анализ по её идентификатору",
                 "consumes": [
                     "application/json"
@@ -175,9 +213,7 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/api/center_request/{id}": {
+            },
             "put": {
                 "description": "Обновляет статус заявки и/или модератора, если это требуется",
                 "consumes": [

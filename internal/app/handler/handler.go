@@ -83,6 +83,7 @@ func (handler *Handler) RegisterHandler(r *gin.Engine) {
 		auth.GET("/api/center_request/:id", handler.ApiGetCenterRequestByID)
 		auth.PUT("/api/center_request/:id", handler.ApiUpdateCenterRequest)
 		auth.PUT("/api/center_request/:id/form", handler.ApiFormCenterRequest)
+		auth.DELETE("/api/center_request/:id", handler.ApiDeleteCenterRequest)
 	}
 }
 

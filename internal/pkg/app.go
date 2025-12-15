@@ -31,7 +31,7 @@ func (a *Application) RunApp() {
 	logrus.Info("Server start up")
 
 	a.Router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"}, // фронтенд
+		AllowOrigins:     []string{"https://localhost:5173"}, // фронтенд
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

@@ -429,6 +429,34 @@ paths:
       summary: Удалить заказ на анализ
       tags:
       - CenterRequest
+    get:
+      consumes:
+      - application/json
+      description: Возвращает детальную информацию о заявке на анализ по её идентификатору
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Детали заявки
+          schema:
+            $ref: '#/definitions/handler.DTO_Resp_CenterRequest'
+        "400":
+          description: Invalid request ID
+          schema:
+            type: string
+        "404":
+          description: request not found
+          schema:
+            type: string
+      summary: Получить заявку по ID
+      tags:
+      - CenterRequest
     put:
       consumes:
       - application/json
@@ -608,31 +636,28 @@ paths:
       - CenterRequest
   /api/center_request/current:
     get:
-      consumes:
-      - application/json
-      description: Возвращает детальную информацию о заявке на анализ по её идентификатору
-      parameters:
-      - description: ID заявки
-        in: path
-        name: id
-        required: true
-        type: integer
+      description: Возвращает ID текущего чернового заказа и количество добавленных
+        экспертов.
       produces:
       - application/json
       responses:
         "200":
-          description: Детали заявки
+          description: OK
           schema:
-            $ref: '#/definitions/handler.DTO_Resp_CenterRequest'
-        "400":
-          description: Invalid request ID
+            $ref: '#/definitions/handler.DTO_Resp_CurrCenterRequestInfo'
+        "401":
+          description: Требуется авторизация
           schema:
-            type: string
-        "404":
-          description: request not found
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка при получении данных
           schema:
-            type: string
-      summary: Получить заявку по ID
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить информацию о текущем черновом заказе
       tags:
       - CenterRequest
   /api/draft/experts/{id}:
