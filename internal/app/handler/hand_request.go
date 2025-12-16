@@ -141,7 +141,7 @@ func (h *Handler) ApiListCenterRequest(ctx *gin.Context) {
 	}
 
 	// Преобразуем заявки в DTO
-	var representRequests []DTO_Resp_CenterRequest
+	representRequests := make([]DTO_Resp_CenterRequest, 0) // Инициализируем пустым массивом
 	for _, req := range reqs {
 		var dtoExperts []DTO_Resp_CenterRequestExpert
 		for _, link := range req.ExpertsLinks {

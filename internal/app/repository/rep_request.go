@@ -109,10 +109,10 @@ func (r *Repository) ListRequestsByUser(userID uint, status, from, to string) ([
 	var requests []*model.CenterRequest
 
 	query := r.db.
-		Preload("ExpertsToRequest.ArtExpert").
-		Preload("User").                // Загрузка данных пользователя-создателя
-		Preload("Moderator").           // Загрузка данных модератора
-		Where("id_creator = ?", userID) // Фильтруем по создателю заявки
+		Preload("ExpertsLinks.ArtExpert"). // Исправлено: было ExpertsToRequest
+		Preload("User").                   // Загрузка данных пользователя-создателя
+		Preload("Moderator").              // Загрузка данных модератора
+		Where("id_creator = ?", userID)    // Фильтруем по создателю заявки
 
 	if status != "" {
 		query = query.Where("request_status = ?", status)
