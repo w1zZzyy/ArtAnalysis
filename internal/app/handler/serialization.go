@@ -57,6 +57,18 @@ type DTO_Req_UpdateExpertInRequest struct {
 	CenterY *float32 `json:"center_y" example:"234.56" binding:"required"`
 }
 
+// DTO_Req_AnalysisResult запрос с результатом от async сервиса
+// @Description Результат асинхронного анализа от внешнего сервиса
+type DTO_Req_AnalysisResult struct {
+	RequestID       int      `json:"request_id" binding:"required"`
+	Success         bool     `json:"success"`
+	AnalysisResult  *string  `json:"analysis_result"`
+	ConfidenceScore *float32 `json:"confidence_score"`
+	ProcessingTime  float32  `json:"processing_time"`
+	Message         string   `json:"message"`
+	ServiceKey      string   `json:"service_key" binding:"required"`
+}
+
 //====== RESPONSES ======
 
 // DTO_Resp_Expert ответ с данными эксперта
@@ -88,16 +100,19 @@ type DTO_Resp_CurrCenterRequestInfo struct {
 // DTO_Resp_Request ответ с данными заявки
 // @Description Полная информация о заявке с экспертами
 type DTO_Resp_CenterRequest struct {
-	ID_request     uint                           `json:"id_request" example:"5"`
-	ID_user        uint                           `json:"id_user" example:"1"`
-	RequestStatus  string                         `json:"request_status" example:"formed" enums:"draft,formed,completed,rejected"`
-	DateCreated    time.Time                      `json:"date_created" example:"2025-11-05T12:00:00Z"`
-	DateFormed     *time.Time                     `json:"date_formed,omitempty" example:"2025-11-06T12:00:00Z"`
-	DateConclusion *time.Time                     `json:"date_conclusion,omitempty" example:"2025-11-07T12:00:00Z"`
-	Description    string                         `gorm:"column:description" json:"description" example:"Art state calculation"`
-	FactorX        *float32                       `json:"factor_x" example:"0.51"`
-	FactorY        *float32                       `json:"factor_y" example:"0.48"`
-	Experts        []DTO_Resp_CenterRequestExpert `json:"experts"`
+	ID_request      uint                           `json:"id_request" example:"5"`
+	ID_user         uint                           `json:"id_user" example:"1"`
+	RequestStatus   string                         `json:"request_status" example:"formed" enums:"draft,formed,completed,rejected"`
+	DateCreated     time.Time                      `json:"date_created" example:"2025-11-05T12:00:00Z"`
+	DateFormed      *time.Time                     `json:"date_formed,omitempty" example:"2025-11-06T12:00:00Z"`
+	DateConclusion  *time.Time                     `json:"date_conclusion,omitempty" example:"2025-11-07T12:00:00Z"`
+	Description     string                         `gorm:"column:description" json:"description" example:"Art state calculation"`
+	FactorX         *float32                       `json:"factor_x" example:"0.51"`
+	FactorY         *float32                       `json:"factor_y" example:"0.48"`
+	AnalysisResult  *string                        `json:"analysis_result,omitempty" example:"Отлично сбалансированная композиция"`
+	ConfidenceScore *float32                       `json:"confidence_score,omitempty" example:"0.85"`
+	AnalysisSuccess *bool                          `json:"analysis_success,omitempty" example:"true"`
+	Experts         []DTO_Resp_CenterRequestExpert `json:"experts"`
 }
 
 // DTO_Resp_CenterRequestExpert связь эксперта и заявки

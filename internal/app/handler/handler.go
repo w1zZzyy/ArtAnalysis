@@ -42,6 +42,10 @@ func (handler *Handler) RegisterHandler(r *gin.Engine) {
 	r.GET("/ArtAnalysis", handler.GetArtExperts)
 	r.GET("/expert_properties/:id", handler.GetArtExpertByID)
 
+	// Internal эндпоинты для межсервисного взаимодействия (с псевдо-авторизацией по ключу)
+	r.POST("/api/internal/analysis-result", handler.ApiReceiveAnalysisResult)
+	r.PUT("/api/internal/analysis-result/:id", handler.ApiUpdateAnalysisResultManual)
+
 	// Эндпоинты, доступные только модераторам
 	moderator := r.Group("/")
 	moderator.Use(handler.AuthMiddleware, handler.ModeratorMiddleware)
@@ -54,6 +58,9 @@ func (handler *Handler) RegisterHandler(r *gin.Engine) {
 
 		// Center Request
 		moderator.PUT("/api/center_request/:id/resolve", handler.ApiResolveCenterRequest)
+
+		// Async analysis (только модератор может запускать анализ)
+		moderator.POST("/api/center_request/:id/analyze", handler.ApiStartAsyncAnalysis)
 	}
 
 	// Эндпоинты, доступные всем авторизованным пользователям

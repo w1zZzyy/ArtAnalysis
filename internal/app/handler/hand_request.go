@@ -157,16 +157,19 @@ func (h *Handler) ApiListCenterRequest(ctx *gin.Context) {
 		}
 
 		representRequests = append(representRequests, DTO_Resp_CenterRequest{
-			ID_request:     req.ID_request,
-			ID_user:        req.ID_creator,
-			RequestStatus:  req.RequestStatus,
-			DateCreated:    req.DateCreated,
-			DateFormed:     req.DateFormed,
-			DateConclusion: req.DateConclusion,
-			Description:    req.RequestDescription,
-			FactorX:        req.FactorX,
-			FactorY:        req.FactorY,
-			Experts:        dtoExperts,
+			ID_request:      req.ID_request,
+			ID_user:         req.ID_creator,
+			RequestStatus:   req.RequestStatus,
+			DateCreated:     req.DateCreated,
+			DateFormed:      req.DateFormed,
+			DateConclusion:  req.DateConclusion,
+			Description:     req.RequestDescription,
+			FactorX:         req.FactorX,
+			FactorY:         req.FactorY,
+			AnalysisResult:  req.AnalysisResult,
+			ConfidenceScore: req.ConfidenceScore,
+			AnalysisSuccess: req.AnalysisSuccess,
+			Experts:         dtoExperts,
 		})
 	}
 

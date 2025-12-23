@@ -15,6 +15,11 @@ type CenterRequest struct {
 	FactorX *float32 `gorm:"column:factor_x"`
 	FactorY *float32 `gorm:"column:factor_y"`
 
+	// Поле для результата асинхронного анализа (заполняется async сервисом)
+	AnalysisResult  *string  `gorm:"column:analysis_result"`
+	ConfidenceScore *float32 `gorm:"column:confidence_score"`
+	AnalysisSuccess *bool    `gorm:"column:analysis_success"`
+
 	ExpertsLinks []ExpertsToRequest `gorm:"foreignKey:ID_request;references:ID_request"`
 
 	Moderator Users `gorm:"foreignKey:ID_moderator;references:ID_user"`

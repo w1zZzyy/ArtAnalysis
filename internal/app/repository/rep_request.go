@@ -230,3 +230,25 @@ func (r *Repository) UpdateExpertInRequest(requestID, expertID uint, centerX, ce
 	}
 	return r.db.Save(&link).Error
 }
+
+// UpdateAnalysisResult обновляет результат асинхронного анализа
+func (r *Repository) UpdateAnalysisResult(requestID uint, success bool, result *string, confidence *float32) error {
+	return r.db.Model(&model.CenterRequest{}).
+		Where("id_request = ?", requestID).
+		Updates(map[string]interface{}{
+			"analysis_success": success,
+			"analysis_result":  result,
+			"confidence_score": confidence,
+		}).Error
+}
+
+// ClearAnalysisResult сбрасывает результат анализа
+func (r *Repository) ClearAnalysisResult(requestID uint) error {
+	return r.db.Model(&model.CenterRequest{}).
+		Where("id_request = ?", requestID).
+		Updates(map[string]interface{}{
+			"analysis_success": nil,
+			"analysis_result":  nil,
+			"confidence_score": nil,
+		}).Error
+}
