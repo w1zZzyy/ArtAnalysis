@@ -182,18 +182,30 @@ func (r *Repository) ResolveCenterRequest(id uint, moderatorID uint, action stri
 	if request.RequestStatus != model.StatusFormed {
 		return nil, errors.New("only formed requests can be resolved")
 	}
+
+	var newStatus string
 	if action == "complete" {
-		request.RequestStatus = model.StatusCompleted
+		newStatus = model.StatusCompleted
 	} else if action == "reject" {
-		request.RequestStatus = model.StatusRejected
+		newStatus = model.StatusRejected
 	} else {
 		return nil, errors.New("invalid action")
 	}
-	request.ID_moderator = &moderatorID
-	request.DateConclusion = &resolvedAt
-	if err := r.db.Save(&request).Error; err != nil {
+
+	// Обновляем только нужные поля, чтобы не перезаписать FactorX/FactorY
+	if err := r.db.Model(&request).Updates(map[string]interface{}{
+		"request_status":  newStatus,
+		"id_moderator":    moderatorID,
+		"date_conclusion": resolvedAt,
+	}).Error; err != nil {
 		return nil, err
 	}
+
+	// Перезагружаем заявку с актуальными данными
+	if err := r.db.Preload("ExpertsLinks").First(&request, id).Error; err != nil {
+		return nil, err
+	}
+
 	return &request, nil
 }
 

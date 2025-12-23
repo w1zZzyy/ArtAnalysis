@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/sirupsen/logrus"
 	"github.com/w1zZzyy22/art-analysis/internal/app/model"
 	"gorm.io/gorm"
 )
@@ -23,6 +24,11 @@ func (r *Repository) CalculateArtAnalysis(requestID uint) error {
 
 	if err != nil {
 		return fmt.Errorf("ошибка загрузки заявки: %v", err)
+	}
+
+	logrus.Infof("CalculateArtAnalysis: requestID=%d, experts count=%d", requestID, len(request.ExpertsLinks))
+	for i, expert := range request.ExpertsLinks {
+		logrus.Infof("  Expert[%d]: id=%d, CenterX=%v, CenterY=%v", i, expert.ID_artcenter, expert.CenterX, expert.CenterY)
 	}
 
 	// Если нет экспертов с координатами
@@ -110,19 +116,10 @@ func (r *Repository) CalculateArtAnalysis(requestID uint) error {
 	finalX := weightedX*float32(trustWeighted) + avgX*float32(1-trustWeighted)
 	finalY := weightedY*float32(trustWeighted) + avgY*float32(1-trustWeighted)
 
-	// 4. Гарантируем диапазон 0-1
-	if finalX < 0 {
-		finalX = 0
-	} else if finalX > 1 {
-		finalX = 1
-	}
-	if finalY < 0 {
-		finalY = 0
-	} else if finalY > 1 {
-		finalY = 1
-	}
+	logrus.Infof("CalculateArtAnalysis: avgX=%.4f, avgY=%.4f, weightedX=%.4f, weightedY=%.4f", avgX, avgY, weightedX, weightedY)
+	logrus.Infof("CalculateArtAnalysis: FINAL result X=%.4f, Y=%.4f", finalX, finalY)
 
-	// 5. Сохраняем
+	// 5. Сохраняем (убрали ограничение 0-1, т.к. координаты могут быть любыми)
 	return r.db.Model(&request).Updates(map[string]interface{}{
 		"factor_x": finalX,
 		"factor_y": finalY,

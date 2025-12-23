@@ -374,14 +374,14 @@ func (h *Handler) ApiResolveCenterRequest(ctx *gin.Context) {
 	// Если задача завершается, вычисляем результат
 	if req.Action == "complete" {
 		// Проверяем, что у задачи есть все необходимые параметры для вычисления результата
-		req, err := h.Repository.GetRequestWithExperts(uint(id))
+		requestData, err := h.Repository.GetRequestWithExperts(uint(id))
 		if err != nil {
 			h.errorHandler(ctx, http.StatusNotFound, err)
 			return
 		}
 
 		// Проверяем наличие описания задачи
-		if req.RequestDescription == "" || req.FactorX == nil || req.FactorY == nil {
+		if requestData.RequestDescription == "" {
 			h.errorHandler(ctx, http.StatusBadRequest, errors.New("task description is required for completion"))
 			return
 		}
