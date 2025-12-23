@@ -92,8 +92,8 @@ type DTO_Resp_CenterRequest struct {
 	ID_user        uint                           `json:"id_user" example:"1"`
 	RequestStatus  string                         `json:"request_status" example:"formed" enums:"draft,formed,completed,rejected"`
 	DateCreated    time.Time                      `json:"date_created" example:"2025-11-05T12:00:00Z"`
-	DateFormed     time.Time                      `json:"date_formed" example:"2025-11-06T12:00:00Z"`
-	DateConclusion time.Time                      `json:"date_conclusion" example:"2025-11-07T12:00:00Z"`
+	DateFormed     *time.Time                     `json:"date_formed,omitempty" example:"2025-11-06T12:00:00Z"`
+	DateConclusion *time.Time                     `json:"date_conclusion,omitempty" example:"2025-11-07T12:00:00Z"`
 	Description    string                         `gorm:"column:description" json:"description" example:"Art state calculation"`
 	FactorX        *float32                       `json:"factor_x" example:"0.51"`
 	FactorY        *float32                       `json:"factor_y" example:"0.48"`

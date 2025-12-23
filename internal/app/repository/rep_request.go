@@ -16,6 +16,9 @@ func (r *Repository) GetDraftRequest(userID uint) (*model.CenterRequest, error) 
 	err := r.db.Where("id_creator = ? AND request_status = ?", userID, model.StatusDraft).
 		First(&request).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil // Not an error, just no draft exists
+		}
 		return nil, err
 	}
 	return &request, nil
@@ -163,7 +166,8 @@ func (r *Repository) FormCenterRequest(id uint) (*model.CenterRequest, error) {
 		return nil, errors.New("only draft requests can be formed")
 	}
 	request.RequestStatus = model.StatusFormed
-	request.DateFormed = time.Now()
+	now := time.Now()
+	request.DateFormed = &now
 	if err := r.db.Save(&request).Error; err != nil {
 		return nil, err
 	}
@@ -186,7 +190,7 @@ func (r *Repository) ResolveCenterRequest(id uint, moderatorID uint, action stri
 		return nil, errors.New("invalid action")
 	}
 	request.ID_moderator = &moderatorID
-	request.DateConclusion = resolvedAt
+	request.DateConclusion = &resolvedAt
 	if err := r.db.Save(&request).Error; err != nil {
 		return nil, err
 	}

@@ -280,6 +280,10 @@ func (h *Handler) ApiAddExpertToDraftCenterRequest(ctx *gin.Context) {
 
 	request, err := h.Repository.GetDraftRequest(userID)
 	if err != nil {
+		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		return
+	}
+	if request == nil {
 		newReq := model.CenterRequest{
 			ID_creator:    userID,
 			RequestStatus: model.StatusDraft,

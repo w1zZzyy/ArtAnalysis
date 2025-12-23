@@ -11,7 +11,6 @@ import (
 	"github.com/w1zZzyy22/art-analysis/internal/app/model"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 func Float32Ptr(f float32) *float32 {
@@ -32,7 +31,11 @@ func (h *Handler) AddExpertToRequest(c *gin.Context) {
 	}
 
 	request, err := h.Repository.GetDraftRequest(userID)
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil {
+		h.errorHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+	if request == nil {
 		newReq := model.CenterRequest{
 			ID_creator:    userID,
 			RequestStatus: model.StatusDraft,
@@ -45,9 +48,6 @@ func (h *Handler) AddExpertToRequest(c *gin.Context) {
 			return
 		}
 		request = &newReq
-	} else if err != nil {
-		h.errorHandler(c, http.StatusInternalServerError, err)
-		return
 	}
 
 	if err = h.Repository.AddExpertToRequest(request.ID_request, uint(expertID)); err != nil {
@@ -163,6 +163,7 @@ func (h *Handler) ApiListCenterRequest(ctx *gin.Context) {
 			DateCreated:    req.DateCreated,
 			DateFormed:     req.DateFormed,
 			DateConclusion: req.DateConclusion,
+			Description:    req.RequestDescription,
 			FactorX:        req.FactorX,
 			FactorY:        req.FactorY,
 			Experts:        dtoExperts,
@@ -213,6 +214,7 @@ func (h *Handler) ApiGetCenterRequestByID(ctx *gin.Context) {
 		DateCreated:    req.DateCreated,
 		ID_user:        req.ID_creator,
 		DateConclusion: req.DateConclusion,
+		Description:    req.RequestDescription,
 		FactorX:        req.FactorX,
 		FactorY:        req.FactorY,
 		Experts:        experts,
@@ -502,14 +504,14 @@ func (h *Handler) ApiRemoveExpertFromCenterRequest(ctx *gin.Context) {
 // @Failure 500 {object} string "Internal server error"
 // @Router /api/center_request/{id}/experts/{expert_id} [put]
 func (h *Handler) ApiUpdateExpertInCenterRequest(ctx *gin.Context) {
-	taskID, err1 := strconv.Atoi(ctx.Param("request_id"))
+	taskID, err1 := strconv.Atoi(ctx.Param("id"))
 	expertID, err2 := strconv.Atoi(ctx.Param("expert_id"))
 	if err1 != nil || err2 != nil || taskID <= 0 || expertID <= 0 {
 		h.errorHandler(ctx, http.StatusBadRequest, errors.New("invalid ids"))
 		return
 	}
 
-	var req DTO_Req_CenterRequestUpd
+	var req DTO_Req_UpdateExpertInRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil || (req.CenterX == nil && req.CenterY == nil) {
 		h.errorHandler(ctx, http.StatusBadRequest, errors.New("center_x or center_y required"))
 		return
