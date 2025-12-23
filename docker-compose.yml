@@ -102,18 +102,18 @@ services:
     volumes:
       - redis-data:/data
 
-  async-service:
-    build:
-      context: ../AsyncService
-      dockerfile: Dockerfile
-    hostname: async-service
-    ports:
-      - "8090:8090"
-    environment:
-      - MAIN_SERVICE_URL=http://host.docker.internal:8080
-    restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+  # async-service:
+  #   build:
+  #     context: ../AsyncService
+  #     dockerfile: Dockerfile
+  #   hostname: async-service
+  #   ports:
+  #     - "8090:8090"
+  #   environment:
+  #     - MAIN_SERVICE_URL=http://host.docker.internal:8080
+  #   restart: unless-stopped
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"
 
 volumes:
   data1-1:

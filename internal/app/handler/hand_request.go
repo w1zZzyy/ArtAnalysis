@@ -212,15 +212,18 @@ func (h *Handler) ApiGetCenterRequestByID(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, DTO_Resp_CenterRequest{
-		ID_request:     req.ID_request,
-		RequestStatus:  req.RequestStatus,
-		DateCreated:    req.DateCreated,
-		ID_user:        req.ID_creator,
-		DateConclusion: req.DateConclusion,
-		Description:    req.RequestDescription,
-		FactorX:        req.FactorX,
-		FactorY:        req.FactorY,
-		Experts:        experts,
+		ID_request:      req.ID_request,
+		RequestStatus:   req.RequestStatus,
+		DateCreated:     req.DateCreated,
+		ID_user:         req.ID_creator,
+		DateConclusion:  req.DateConclusion,
+		Description:     req.RequestDescription,
+		FactorX:         req.FactorX,
+		FactorY:         req.FactorY,
+		AnalysisResult:  req.AnalysisResult,
+		ConfidenceScore: req.ConfidenceScore,
+		AnalysisSuccess: req.AnalysisSuccess,
+		Experts:         experts,
 	})
 }
 
