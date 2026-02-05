@@ -10,4 +10,5 @@ type ArtExpert struct {
 	Algorithm    string `gorm:"column:algorithm;not null"`
 
 	Orders []ExpertsToRequest `gorm:"foreignKey:ID_artcenter;references:ID_artcenter"`
+	Media  []ExpertMedia      `gorm:"foreignKey:ID_artcenter;references:ID_artcenter"`
 }

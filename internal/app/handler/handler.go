@@ -37,6 +37,8 @@ func (handler *Handler) RegisterHandler(r *gin.Engine) {
 	// experts
 	r.GET("/api/experts", handler.ApiExpertsList)
 	r.GET("/api/experts/:id", handler.ApiGetExpertByID)
+	r.GET("/api/experts/:id/full", handler.ApiGetExpertWithMedia)
+	r.GET("/api/experts/:id/media", handler.ApiGetExpertMedia)
 
 	// HTML
 	r.GET("/ArtAnalysis", handler.GetArtExperts)
@@ -55,6 +57,10 @@ func (handler *Handler) RegisterHandler(r *gin.Engine) {
 		moderator.PUT("/api/experts/:id", handler.ApiUpdateExpert)
 		moderator.DELETE("/api/experts/:id", handler.ApiDeleteExpert)
 		moderator.POST("/api/experts/:id/image", handler.ApiUploadExpertImage)
+
+		// Expert Media
+		moderator.POST("/api/experts/:id/media", handler.ApiUploadExpertMedia)
+		moderator.DELETE("/api/experts/:id/media/:media_id", handler.ApiDeleteExpertMedia)
 
 		// Center Request
 		moderator.PUT("/api/center_request/:id/resolve", handler.ApiResolveCenterRequest)

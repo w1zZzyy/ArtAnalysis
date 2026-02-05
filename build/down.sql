@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS expert_media CASCADE;
 DROP TABLE IF EXISTS experts_to_requests CASCADE;
 DROP TABLE IF EXISTS center_requests CASCADE;
 DROP TABLE IF EXISTS art_experts CASCADE;

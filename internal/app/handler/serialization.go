@@ -176,3 +176,26 @@ type DTO_Resp_TokenLogin struct {
 	Token string   `json:"token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
 	User  DTO_User `json:"user"`
 }
+
+// DTO_Resp_ExpertMedia медиафайл эксперта
+// @Description Информация о медиафайле (фото/видео) эксперта
+type DTO_Resp_ExpertMedia struct {
+	ID_media     uint   `json:"id_media" example:"1"`
+	ID_artcenter uint   `json:"id_artcenter" example:"1"`
+	MediaURL     string `json:"media_url" example:"http://localhost:9000/art-center/media/photo.jpg"`
+	MediaType    string `json:"media_type" example:"image" enums:"image,video"`
+	CreatedAt    string `json:"created_at" example:"2025-11-05T12:00:00Z"`
+}
+
+// DTO_Resp_ExpertWithMedia эксперт с медиафайлами
+// @Description Полная информация об эксперте включая медиафайлы
+type DTO_Resp_ExpertWithMedia struct {
+	ID_artcenter uint                   `json:"id_artcenter" example:"1"`
+	Title        string                 `json:"title" example:"Центр анализа №1"`
+	Description  string                 `json:"description" example:"Определяет композиционный центр"`
+	Status       bool                   `json:"status" example:"true"`
+	Name         string                 `json:"name" example:"Иванов И.И."`
+	Algorithm    string                 `json:"algorithm" example:"geometric_center"`
+	ImgURL       *string                `json:"img_url" example:"expert_photo.png"`
+	Media        []DTO_Resp_ExpertMedia `json:"media"`
+}
