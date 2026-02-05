@@ -131,7 +131,7 @@ func (h *Handler) ApiStartAsyncAnalysis(ctx *gin.Context) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
 		h.errorHandler(ctx, http.StatusInternalServerError, fmt.Errorf("async service returned status: %d", resp.StatusCode))
 		return
 	}

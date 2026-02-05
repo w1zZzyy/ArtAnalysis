@@ -13,11 +13,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// simple singleton for demo auth
-var creatorUserID uint = 1
-
-func currentUserID() uint { return creatorUserID }
-
 // Register регистрирует нового пользователя
 // @Summary Регистрация пользователя
 // @Description Создает нового пользователя с указанными логином и паролем
@@ -120,7 +115,12 @@ func (h *Handler) Login(ctx *gin.Context) {
 // @Failure 500 {object} string "Internal server error"
 // @Router /api/users/me [get]
 func (h *Handler) ApiMe(ctx *gin.Context) {
-	user, err := h.Repository.GetUserByID(currentUserID())
+	userID, err := getUserIDFromContext(ctx)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusUnauthorized, err)
+		return
+	}
+	user, err := h.Repository.GetUserByID(userID)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
@@ -142,12 +142,17 @@ func (h *Handler) ApiMe(ctx *gin.Context) {
 // @Failure 500 {object} string "Internal server error"
 // @Router /api/users/me [put]
 func (h *Handler) ApiUpdateMe(ctx *gin.Context) {
+	userID, err := getUserIDFromContext(ctx)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusUnauthorized, err)
+		return
+	}
 	var req DTO_Req_UserUpd
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
-	updated, err := h.Repository.UpdateUser(currentUserID(), req.Password)
+	updated, err := h.Repository.UpdateUser(userID, req.Password)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
